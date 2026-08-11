@@ -12,7 +12,10 @@ export default function Dashboard() {
   return (
     <>
       <div className="header">
-        <h1><ShieldCheck /> Safe Cow</h1>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <img src="/src/assets/safe cow.png" alt="Safe Cow" style={{ width: '32px', height: '32px', objectFit: 'contain' }} />
+          <h1 style={{ margin: 0 }}>Safe Cow</h1>
+        </div>
         {user?.role === 'admin' && <span className="badge" style={{ marginLeft: '0.5rem' }}>Admin</span>}
       </div>
       

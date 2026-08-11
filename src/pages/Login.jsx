@@ -58,8 +58,8 @@ export default function Login() {
   return (
     <div className="content" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', height: '100%' }}>
       <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-        <ShieldCheck size={64} color="var(--primary-color)" style={{ margin: '0 auto' }} />
-        <h1 style={{ marginTop: '1rem', color: 'var(--primary-color)' }}>Safe Cow</h1>
+        <img src="/src/assets/safe cow.png" alt="Safe Cow Logo" style={{ width: '120px', height: '120px', objectFit: 'contain', margin: '0 auto' }} />
+        <h1 style={{ marginTop: '0.5rem', color: 'var(--primary-color)' }}>Safe Cow</h1>
         <p>Digital Patrol & Registration System</p>
       </div>
 
