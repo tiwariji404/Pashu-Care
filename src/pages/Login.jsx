@@ -82,7 +82,13 @@ export default function Login() {
                 onChange={e => setPhone(e.target.value.replace(/\D/g, '').substring(0,10))}
               />
             </div>
-            <p style={{ fontSize: '0.8rem', color: '#666', marginTop: '-10px' }}>Hint: Use 9999999999 for Admin.</p>
+            <div style={{ fontSize: '0.75rem', color: '#666', marginTop: '-10px', marginBottom: '5px' }}>
+              <strong>Demo Logins (OTP: 1234):</strong><br/>
+              Admin: 9999999999<br/>
+              Manager: 1111111111<br/>
+              Patrol: 2222222222<br/>
+              Agent: 3333333333
+            </div>
             <button type="submit" className="btn btn-primary" style={{ marginTop: '1rem' }}>
               Continue <ArrowRight size={18} />
             </button>

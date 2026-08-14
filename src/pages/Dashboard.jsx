@@ -1,13 +1,38 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '../store/appStore';
-import { ScanLine, ShieldCheck, AlertCircle, TrendingUp, Ban, MapPin, AlertTriangle, Stethoscope, BookOpen, Activity, Ambulance, UserCircle } from 'lucide-react';
+import { ScanLine, ShieldCheck, AlertCircle, TrendingUp, Ban, MapPin, AlertTriangle, Stethoscope, BookOpen, Activity, Ambulance, UserCircle, UserPlus, Users } from 'lucide-react';
+import ManagerDashboard from './ManagerDashboard';
+import PatrolDashboard from './PatrolDashboard';
+import TaggingDashboard from './TaggingDashboard';
 
 export default function Dashboard() {
-  const { user, complaints, revenue, cows } = useAppStore();
+  const { user, users, complaints, revenue, cows, assignRole } = useAppStore();
   const navigate = useNavigate();
   
   const seizedCows = cows.filter(c => c.seized);
+
+  const [showWorkersProgress, setShowWorkersProgress] = React.useState(false);
+
+  const [assignPhone, setAssignPhone] = React.useState('');
+  const [assignName, setAssignName] = React.useState('');
+  const [assignRoleType, setAssignRoleType] = React.useState('gaushala_manager');
+
+  const handleAssignRole = (e) => {
+    e.preventDefault();
+    if(assignPhone.length === 10 && assignName.trim()) {
+      assignRole(assignPhone, assignName, assignRoleType);
+      alert(`Role ${assignRoleType} assigned to ${assignName} (${assignPhone}) successfully!`);
+      setAssignPhone('');
+      setAssignName('');
+    } else {
+      alert('Please enter valid 10-digit phone and name.');
+    }
+  };
+
+  if (user?.role === 'gaushala_manager') return <ManagerDashboard />;
+  if (user?.role === 'patrol_squad') return <PatrolDashboard />;
+  if (user?.role === 'tagging_agent') return <TaggingDashboard />;
 
   return (
     <>
@@ -104,6 +129,97 @@ export default function Dashboard() {
                 <button className="btn btn-outline" style={{ padding: '0.25rem 0.5rem', marginTop: '0.5rem', fontSize: '0.8rem' }} onClick={() => navigate(`/cow/${c.qrId}`)}>View Details</button>
               </div>
             ))}
+          </div>
+        )}
+
+        {user?.role === 'admin' && (
+          <div className="card" style={{ marginBottom: '2rem', borderColor: 'var(--primary-color)' }}>
+             <div 
+               style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }}
+               onClick={() => setShowWorkersProgress(!showWorkersProgress)}
+             >
+               <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0 }}>
+                 <Users size={20} color="var(--primary-color)" /> सभी कार्यकर्ताओं की प्रगति (Worker Progress)
+               </h3>
+               <span style={{ fontSize: '1.25rem', color: 'var(--primary-color)' }}>{showWorkersProgress ? '−' : '+'}</span>
+             </div>
+             
+             {showWorkersProgress && (
+               <div style={{ marginTop: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                 {users.filter(u => u.role !== 'admin' && u.role !== 'user').map(worker => {
+                   const inv = worker.inventory || { total: 0, remaining: 0, label: 'कार्य' };
+                   const used = inv.total - inv.remaining;
+                   const progressPercent = inv.total > 0 ? (used / inv.total) * 100 : 0;
+                   const roleNames = {
+                     gaushala_manager: 'गौशाला प्रबंधक',
+                     patrol_squad: 'गश्ती दस्ता',
+                     tagging_agent: 'टैगिंग एजेंट'
+                   };
+                   return (
+                     <div key={worker.phone} style={{ padding: '1rem', backgroundColor: 'var(--bg-color)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                         <strong>{worker.name} <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>({roleNames[worker.role] || worker.role})</span></strong>
+                         <span style={{ fontSize: '0.875rem' }}>{worker.phone}</span>
+                       </div>
+                       <div style={{ marginBottom: '0.5rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                         {inv.label}: {used} / {inv.total} (शेष: {inv.remaining})
+                       </div>
+                       <div style={{ width: '100%', height: '8px', backgroundColor: 'var(--border-color)', borderRadius: '4px', overflow: 'hidden' }}>
+                         <div style={{ width: `${progressPercent}%`, height: '100%', backgroundColor: 'var(--primary-color)' }}></div>
+                       </div>
+                     </div>
+                   );
+                 })}
+                 {users.filter(u => u.role !== 'admin' && u.role !== 'user').length === 0 && (
+                   <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--text-secondary)' }}>कोई कार्यकर्ता नहीं मिला।</p>
+                 )}
+               </div>
+             )}
+          </div>
+        )}
+
+        {user?.role === 'admin' && (
+          <div className="card" style={{ marginBottom: '2rem', borderColor: 'var(--primary-color)' }}>
+            <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
+              <UserPlus size={20} color="var(--primary-color)" /> Assign Specific Roles
+            </h3>
+            <form onSubmit={handleAssignRole}>
+              <div className="form-group" style={{ marginBottom: '0.75rem' }}>
+                <label style={{ fontSize: '0.85rem' }}>Phone Number</label>
+                <input 
+                  type="tel" 
+                  className="form-control" 
+                  placeholder="10-digit number"
+                  value={assignPhone}
+                  onChange={e => setAssignPhone(e.target.value.replace(/\D/g, '').substring(0,10))}
+                />
+              </div>
+              <div className="form-group" style={{ marginBottom: '0.75rem' }}>
+                <label style={{ fontSize: '0.85rem' }}>Name</label>
+                <input 
+                  type="text" 
+                  className="form-control" 
+                  placeholder="Employee Name"
+                  value={assignName}
+                  onChange={e => setAssignName(e.target.value)}
+                />
+              </div>
+              <div className="form-group" style={{ marginBottom: '1rem' }}>
+                <label style={{ fontSize: '0.85rem' }}>Select Role</label>
+                <select 
+                  className="form-control" 
+                  value={assignRoleType}
+                  onChange={e => setAssignRoleType(e.target.value)}
+                  style={{ backgroundColor: 'var(--bg-color)' }}
+                >
+                  <option value="gaushala_manager">Gaushala Manager</option>
+                  <option value="patrol_squad">Patrolling Squad</option>
+                  <option value="tagging_agent">QR Tagging Agent</option>
+                  <option value="admin">Administrator</option>
+                </select>
+              </div>
+              <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '0.75rem' }}>Assign Role</button>
+            </form>
           </div>
         )}
 

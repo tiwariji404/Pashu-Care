@@ -2,11 +2,50 @@ import { create } from 'zustand';
 
 export const useAppStore = create((set, get) => ({
   user: null, // { phone, role: 'admin' | 'user', name, location }
-  users: [], // Array of registered users
+  users: [
+    { phone: '1111111111', role: 'gaushala_manager', name: 'Raj Tiwari', location: 'Garhwa', inventory: { total: 100, remaining: 50, label: 'गौशाला क्षमता' } },
+    { phone: '2222222222', role: 'patrol_squad', name: 'Bishal', location: 'HQ', inventory: { total: 50, remaining: 20, label: 'गश्ती कार्य' } },
+    { phone: '3333333333', role: 'tagging_agent', name: 'XYZ', location: 'Field', inventory: { total: 200, remaining: 85, label: 'QR टैग' } }
+  ], // Array of registered users
   cows: [], 
   complaints: [], // violations ledger
   revenue: { total: 0, municipality: 0, pppFirm: 0 },
   
+  assignRole: (phone, name, role) => {
+    set(state => {
+      const existingUserIndex = state.users.findIndex(u => u.phone === phone);
+      if (existingUserIndex >= 0) {
+        const updatedUsers = [...state.users];
+        let label = 'कार्य';
+        if(role === 'gaushala_manager') label = 'गौशाला क्षमता';
+        if(role === 'tagging_agent') label = 'QR टैग';
+        if(role === 'patrol_squad') label = 'गश्ती कार्य';
+        updatedUsers[existingUserIndex] = { ...updatedUsers[existingUserIndex], role, name, inventory: { total: 100, remaining: 100, label } };
+        return { users: updatedUsers };
+      }
+      
+      let label = 'कार्य';
+      if(role === 'gaushala_manager') label = 'गौशाला क्षमता';
+      if(role === 'tagging_agent') label = 'QR टैग';
+      if(role === 'patrol_squad') label = 'गश्ती कार्य';
+
+      // If user doesn't exist, create them
+      return { 
+        users: [...state.users, { phone, role, name, location: 'Assigned by Admin', inventory: { total: 100, remaining: 100, label } }]
+      };
+    });
+  },
+
+  updateUserInventory: (phone, total, remaining) => {
+    set(state => {
+      const users = state.users.map(u => 
+        u.phone === phone ? { ...u, inventory: { ...u.inventory, total, remaining } } : u
+      );
+      const user = state.user?.phone === phone ? { ...state.user, inventory: { ...state.user.inventory, total, remaining } } : state.user;
+      return { users, user };
+    });
+  },
+
   missingReports: [
     {
       id: 'm1',
