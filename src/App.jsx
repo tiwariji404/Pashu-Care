@@ -16,6 +16,8 @@ import KnowledgeHub from './pages/KnowledgeHub';
 import DiseaseAlerts from './pages/DiseaseAlerts';
 import AmbulanceList from './pages/AmbulanceList';
 import UserProfile from './pages/UserProfile';
+import WorkerProfile from './pages/WorkerProfile';
+import AgentList from './pages/AgentList';
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -44,6 +46,8 @@ function App() {
           <Route path="/alerts" element={<ProtectedRoute><DiseaseAlerts /></ProtectedRoute>} />
           <Route path="/ambulance" element={<ProtectedRoute><AmbulanceList /></ProtectedRoute>} />
           <Route path="/profile" element={<ProtectedRoute><UserProfile /></ProtectedRoute>} />
+          <Route path="/worker/:phone" element={<ProtectedRoute><WorkerProfile /></ProtectedRoute>} />
+          <Route path="/admin/agents/:role" element={<ProtectedRoute><AgentList /></ProtectedRoute>} />
         </Routes>
       </div>
     </Router>

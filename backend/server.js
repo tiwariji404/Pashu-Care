@@ -49,7 +49,8 @@ let state = {
     { id: 3, name: "City Vet Ambulance", location: "Ranchi", phone: "9800000000", vehicle: "Specialized Vet Van" },
     { id: 4, name: "Garhwa Animal Rescue Van", location: "Garhwa", phone: "9876000004", vehicle: "Hydraulic Vet Truck" },
     { id: 5, name: "Mukesh Transport", location: "Hazaribagh", phone: "9876000005", vehicle: "Tractor Trolley" }
-  ]
+  ],
+  warehouseInventory: 50000
 };
 
 // API: GET FULL STATE (For simple initial load)
@@ -63,8 +64,24 @@ app.get('/api/state', (req, res) => {
     gaushalas: state.gaushalas,
     vets: state.vets,
     diseaseAlerts: state.diseaseAlerts,
-    ambulances: state.ambulances
+    ambulances: state.ambulances,
+    warehouseInventory: state.warehouseInventory
   });
+});
+
+// API: TRANSFER INVENTORY
+app.post('/api/inventory/transfer', (req, res) => {
+  const { phone, amount } = req.body;
+  const user = state.users.find(u => u.phone === phone);
+  
+  if (user && user.inventory) {
+    user.inventory.total += amount;
+    user.inventory.remaining += amount;
+    state.warehouseInventory -= amount;
+    res.json({ success: true, inventory: user.inventory, warehouseInventory: state.warehouseInventory });
+  } else {
+    res.status(404).json({ error: 'User not found or no inventory' });
+  }
 });
 
 // API: AUTHENTICATION
@@ -134,30 +151,57 @@ app.post('/api/cows', (req, res) => {
 
 // API: COMPLAINTS
 app.post('/api/complaints', (req, res) => {
-  const complaintData = req.body;
-  const cowIndex = state.cows.findIndex(c => c.qrId === complaintData.cowQrId);
-  if (cowIndex === -1) return res.status(404).json({ error: 'Cow not found' });
+  const { cowQrId, location, timestamp, reporterPhone, reason, photo, animalState, landmark, issueFine } = req.body;
+  const cowIndex = state.cows.findIndex(c => c.qrId === cowQrId);
+  if (cowIndex === -1) return res.status(404).json({ error: 'Animal not found' });
 
   const cow = state.cows[cowIndex];
-  if (cow.seized) return res.status(400).json({ error: 'Cow already seized' });
+  if (cow.seized) return res.status(400).json({ error: 'Animal already seized' });
 
-  const newStrikes = cow.strikes + 1;
+  let mapUrl = '';
+  if (location && location.lat && location.lng) {
+    mapUrl = `https://maps.google.com/?q=${location.lat},${location.lng}`;
+  }
+
+  // MOCK SMS LOGIC
+  console.log(`\n[SMS MOCK] Dispatching to Owner (${cow.ownerName}): "Your animal (${cow.breed}) was reported by a patrol squad. Location: ${mapUrl}"\n`);
+
+  let newStrikes = cow.strikes;
   let fine = 0;
   let seized = false;
+  let type = 'alert';
+  let status = 'alert_sent';
 
-  if (newStrikes === 1) fine = 1000;
-  else if (newStrikes === 2) fine = 3000;
-  else if (newStrikes >= 3) seized = true;
+  if (issueFine) {
+    newStrikes += 1;
+    type = 'violation';
+    if (newStrikes === 1) fine = 1000;
+    else if (newStrikes === 2) fine = 3000;
+    else if (newStrikes >= 3) seized = true;
+    status = seized ? 'pending_seizure' : 'unpaid';
+  }
 
   const newComplaint = {
-    ...complaintData,
+    cowQrId,
+    location,
+    timestamp,
+    reporterPhone,
+    reason,
+    photo,
+    animalState,
+    landmark,
+    mapUrl,
+    type,
     strikeLevel: newStrikes,
     fine,
-    status: seized ? 'pending_seizure' : 'unpaid',
+    status,
     id: Date.now().toString()
   };
 
-  state.cows[cowIndex] = { ...cow, strikes: newStrikes, seized };
+  if (issueFine) {
+    state.cows[cowIndex] = { ...cow, strikes: newStrikes, seized };
+  }
+  
   state.complaints.push(newComplaint);
 
   res.json({ success: true, complaints: state.complaints, cows: state.cows });

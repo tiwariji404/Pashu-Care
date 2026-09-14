@@ -2,23 +2,33 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAppStore } from '../store/appStore';
-import { ScanLine, ShieldCheck, AlertCircle, TrendingUp, Ban, MapPin, AlertTriangle, Stethoscope, BookOpen, Activity, Ambulance, UserCircle, UserPlus, Users } from 'lucide-react';
+import { ScanLine, ShieldCheck, AlertCircle, TrendingUp, Ban, MapPin, AlertTriangle, Stethoscope, BookOpen, Activity, Ambulance, UserCircle, UserPlus, Users, Package } from 'lucide-react';
 import ManagerDashboard from './ManagerDashboard';
 import PatrolDashboard from './PatrolDashboard';
 import TaggingDashboard from './TaggingDashboard';
 
 export default function Dashboard() {
   const { t } = useTranslation();
-  const { user, users, complaints, revenue, cows, assignRole } = useAppStore();
+  const { user, users, complaints, revenue, cows, missingReports, assignRole, warehouseInventory, allocateInventory } = useAppStore();
   const navigate = useNavigate();
   
   const seizedCows = cows.filter(c => c.seized);
 
-  const [showWorkersProgress, setShowWorkersProgress] = React.useState(false);
-
   const [assignPhone, setAssignPhone] = React.useState('');
   const [assignName, setAssignName] = React.useState('');
   const [assignRoleType, setAssignRoleType] = React.useState('gaushala_manager');
+
+  const [rfidAgent, setRfidAgent] = React.useState('');
+  const [rfidAmount, setRfidAmount] = React.useState('');
+
+  const handleAllocate = (e) => {
+    e.preventDefault();
+    if(rfidAgent && rfidAmount > 0) {
+      allocateInventory(rfidAgent, rfidAmount);
+      alert(`${rfidAmount} tags dispatched successfully!`);
+      setRfidAmount('');
+    }
+  };
 
   const handleAssignRole = (e) => {
     e.preventDefault();
@@ -58,45 +68,49 @@ export default function Dashboard() {
           <UserCircle size={36} color="var(--primary-color)" />
         </div>
 
-        {/* Quick Actions Navigation */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '2rem' }}>
-           <button 
-             onClick={() => navigate('/vets')} 
-             style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', padding: '1.5rem 0.5rem', border: '1px solid #3b82f6', borderRadius: '12px', backgroundColor: 'rgba(59, 130, 246, 0.05)', color: '#2563eb', cursor: 'pointer', textAlign: 'center' }}>
-             <Stethoscope size={28} />
-             <strong style={{ fontSize: '0.9rem' }}>{t('vet_doctor')}</strong>
-           </button>
-           <button 
-             onClick={() => navigate('/ambulance')} 
-             style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', padding: '1.5rem 0.5rem', border: '1px solid #0d9488', borderRadius: '12px', backgroundColor: 'rgba(13, 148, 136, 0.05)', color: '#0d9488', cursor: 'pointer', textAlign: 'center' }}>
-             <Ambulance size={28} />
-             <strong style={{ fontSize: '0.9rem' }}>{t('cow_ambulance')}</strong>
-           </button>
-           <button 
-             onClick={() => navigate('/gaushalas')} 
-             style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', padding: '1.5rem 0.5rem', border: '1px solid var(--primary-color)', borderRadius: '12px', backgroundColor: 'rgba(16, 185, 129, 0.05)', color: 'var(--primary-hover)', cursor: 'pointer', textAlign: 'center' }}>
-             <MapPin size={28} />
-             <strong style={{ fontSize: '0.9rem' }}>{t('gaushalas')}</strong>
-           </button>
-           <button 
-             onClick={() => navigate('/missing')} 
-             style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', padding: '1.5rem 0.5rem', border: '1px solid var(--danger-hover)', borderRadius: '12px', backgroundColor: 'rgba(239, 68, 68, 0.05)', color: 'var(--danger-hover)', cursor: 'pointer', textAlign: 'center' }}>
-             <AlertTriangle size={28} />
-             <strong style={{ fontSize: '0.9rem' }}>{t('missing_report')}</strong>
-           </button>
-           <button 
-             onClick={() => navigate('/knowledge')} 
-             style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', padding: '1.5rem 0.5rem', border: '1px solid #eab308', borderRadius: '12px', backgroundColor: 'rgba(234, 179, 8, 0.05)', color: '#ca8a04', cursor: 'pointer', textAlign: 'center' }}>
-             <BookOpen size={28} />
-             <strong style={{ fontSize: '0.9rem' }}>{t('animal_knowledge')}</strong>
-           </button>
-           <button 
-             onClick={() => navigate('/alerts')} 
-             style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', padding: '1.5rem 0.5rem', border: '1px solid #9333ea', borderRadius: '12px', backgroundColor: 'rgba(147, 51, 234, 0.05)', color: '#9333ea', cursor: 'pointer', textAlign: 'center' }}>
-             <Activity size={28} />
-             <strong style={{ fontSize: '0.9rem' }}>{t('disease_alerts')}</strong>
-           </button>
-        </div>
+        {/* Quick Actions Navigation for Citizens */}
+        {user?.role !== 'admin' && (
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '2rem' }}>
+             <button 
+               onClick={() => navigate('/vets')} 
+               style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', padding: '1.5rem 0.5rem', border: '1px solid #3b82f6', borderRadius: '12px', backgroundColor: 'rgba(59, 130, 246, 0.05)', color: '#2563eb', cursor: 'pointer', textAlign: 'center' }}>
+               <Stethoscope size={28} />
+               <strong style={{ fontSize: '0.9rem' }}>{t('vet_doctor')}</strong>
+             </button>
+             <button 
+               onClick={() => navigate('/ambulance')} 
+               style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', padding: '1.5rem 0.5rem', border: '1px solid #0d9488', borderRadius: '12px', backgroundColor: 'rgba(13, 148, 136, 0.05)', color: '#0d9488', cursor: 'pointer', textAlign: 'center' }}>
+               <Ambulance size={28} />
+               <strong style={{ fontSize: '0.9rem' }}>{t('cow_ambulance')}</strong>
+             </button>
+             <button 
+               onClick={() => navigate('/gaushalas')} 
+               style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', padding: '1.5rem 0.5rem', border: '1px solid var(--primary-color)', borderRadius: '12px', backgroundColor: 'rgba(16, 185, 129, 0.05)', color: 'var(--primary-hover)', cursor: 'pointer', textAlign: 'center' }}>
+               <MapPin size={28} />
+               <strong style={{ fontSize: '0.9rem' }}>{t('gaushalas')}</strong>
+             </button>
+             <button 
+               onClick={() => navigate('/missing')} 
+               style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', padding: '1.5rem 0.5rem', border: '1px solid var(--danger-hover)', borderRadius: '12px', backgroundColor: 'rgba(239, 68, 68, 0.05)', color: 'var(--danger-hover)', cursor: 'pointer', textAlign: 'center' }}>
+               <AlertTriangle size={28} />
+               <strong style={{ fontSize: '0.9rem' }}>{t('missing_report')}</strong>
+             </button>
+             <button 
+               onClick={() => navigate('/knowledge')} 
+               style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', padding: '1.5rem 0.5rem', border: '1px solid #eab308', borderRadius: '12px', backgroundColor: 'rgba(234, 179, 8, 0.05)', color: '#ca8a04', cursor: 'pointer', textAlign: 'center' }}>
+               <BookOpen size={28} />
+               <strong style={{ fontSize: '0.9rem' }}>{t('animal_knowledge')}</strong>
+             </button>
+             <button 
+               onClick={() => navigate('/alerts')} 
+               style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', padding: '1.5rem 0.5rem', border: '1px solid #9333ea', borderRadius: '12px', backgroundColor: 'rgba(147, 51, 234, 0.05)', color: '#9333ea', cursor: 'pointer', textAlign: 'center' }}>
+               <Activity size={28} />
+               <strong style={{ fontSize: '0.9rem' }}>{t('disease_alerts')}</strong>
+             </button>
+          </div>
+        )}
+
+
 
         {user?.role === 'admin' && seizedCows.length > 0 && (
           <div className="card" style={{ borderLeft: '4px solid var(--danger-color)' }}>
@@ -114,48 +128,68 @@ export default function Dashboard() {
         )}
 
         {user?.role === 'admin' && (
-          <div className="card" style={{ marginBottom: '2rem', borderColor: 'var(--primary-color)' }}>
-             <div 
-               style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }}
-               onClick={() => setShowWorkersProgress(!showWorkersProgress)}
-             >
-               <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0 }}>
-                 <Users size={20} color="var(--primary-color)" /> {t('worker_progress')}
-               </h3>
-               <span style={{ fontSize: '1.25rem', color: 'var(--primary-color)' }}>{showWorkersProgress ? '−' : '+'}</span>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
+             <div className="card" onClick={() => navigate('/admin/agents/tagging_agent')} style={{ cursor: 'pointer', padding: '1.5rem 1rem', textAlign: 'center', borderColor: '#3b82f6', backgroundColor: '#eff6ff', transition: 'transform 0.2s' }}>
+               <h3 style={{ fontSize: '2rem', margin: '0 0 0.25rem 0', color: '#2563eb' }}>{users.filter(u => u.role === 'tagging_agent').length}</h3>
+               <p style={{ margin: 0, fontSize: '1rem', fontWeight: 600, color: '#1e3a8a' }}>Tagging Agents</p>
+               <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.8rem', color: '#3b82f6' }}>View All Agents &rarr;</p>
              </div>
              
-             {showWorkersProgress && (
-               <div style={{ marginTop: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                 {users.filter(u => u.role !== 'admin' && u.role !== 'user').map(worker => {
-                   const inv = worker.inventory || { total: 0, remaining: 0, label: 'कार्य' };
-                   const used = inv.total - inv.remaining;
-                   const progressPercent = inv.total > 0 ? (used / inv.total) * 100 : 0;
-                   const roleNames = {
-                     gaushala_manager: 'गौशाला प्रबंधक',
-                     patrol_squad: 'गश्ती दस्ता',
-                     tagging_agent: 'टैगिंग एजेंट'
-                   };
-                   return (
-                     <div key={worker.phone} style={{ padding: '1rem', backgroundColor: 'var(--bg-color)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
-                       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                         <strong>{worker.name} <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>({roleNames[worker.role] || worker.role})</span></strong>
-                         <span style={{ fontSize: '0.875rem' }}>{worker.phone}</span>
-                       </div>
-                       <div style={{ marginBottom: '0.5rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                         {inv.label}: {used} / {inv.total} (शेष: {inv.remaining})
-                       </div>
-                       <div style={{ width: '100%', height: '8px', backgroundColor: 'var(--border-color)', borderRadius: '4px', overflow: 'hidden' }}>
-                         <div style={{ width: `${progressPercent}%`, height: '100%', backgroundColor: 'var(--primary-color)' }}></div>
-                       </div>
-                     </div>
-                   );
-                 })}
-                 {users.filter(u => u.role !== 'admin' && u.role !== 'user').length === 0 && (
-                   <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--text-secondary)' }}>कोई कार्यकर्ता नहीं मिला।</p>
-                 )}
-               </div>
-             )}
+             <div className="card" onClick={() => navigate('/admin/agents/patrol_squad')} style={{ cursor: 'pointer', padding: '1.5rem 1rem', textAlign: 'center', borderColor: 'var(--danger-hover)', backgroundColor: '#fef2f2', transition: 'transform 0.2s' }}>
+               <h3 style={{ fontSize: '2rem', margin: '0 0 0.25rem 0', color: 'var(--danger-hover)' }}>{users.filter(u => u.role === 'patrol_squad').length}</h3>
+               <p style={{ margin: 0, fontSize: '1rem', fontWeight: 600, color: '#7f1d1d' }}>Patrolling Squads</p>
+               <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.8rem', color: 'var(--danger-hover)' }}>View All Squads &rarr;</p>
+             </div>
+             
+             <div className="card" onClick={() => navigate('/admin/agents/gaushala_manager')} style={{ cursor: 'pointer', padding: '1.5rem 1rem', textAlign: 'center', borderColor: 'var(--primary-color)', backgroundColor: '#ecfdf5', transition: 'transform 0.2s' }}>
+               <h3 style={{ fontSize: '2rem', margin: '0 0 0.25rem 0', color: 'var(--primary-hover)' }}>{users.filter(u => u.role === 'gaushala_manager').length}</h3>
+               <p style={{ margin: 0, fontSize: '1rem', fontWeight: 600, color: '#064e3b' }}>Gaushala Managers</p>
+               <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.8rem', color: 'var(--primary-color)' }}>View All Managers &rarr;</p>
+             </div>
+          </div>
+        )}
+
+        {user?.role === 'admin' && (
+          <div className="card" style={{ marginBottom: '2rem', borderColor: '#cbd5e1', backgroundColor: '#f8fafc' }}>
+            <h3 style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', marginBottom: '1rem' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#475569' }}>
+                <Package size={20} /> RFID Supply & Dispatch
+              </span>
+              <span className="badge" style={{ backgroundColor: '#64748b', color: 'white', fontSize: '0.8rem' }}>
+                Govt Stock: {warehouseInventory?.toLocaleString() || 50000} Tags
+              </span>
+            </h3>
+            <form onSubmit={handleAllocate}>
+              <div className="form-group" style={{ marginBottom: '0.75rem' }}>
+                <label style={{ fontSize: '0.85rem', color: '#334155' }}>Select Tagging Agent</label>
+                <select 
+                  className="form-control" 
+                  value={rfidAgent}
+                  onChange={e => setRfidAgent(e.target.value)}
+                  style={{ backgroundColor: 'white', borderColor: '#cbd5e1' }}
+                  required
+                >
+                  <option value="">-- Choose Active Field Agent --</option>
+                  {users.filter(u => u.role === 'tagging_agent').map(a => (
+                    <option key={a.phone} value={a.phone}>{a.name} ({a.phone})</option>
+                  ))}
+                </select>
+              </div>
+              <div className="form-group" style={{ marginBottom: '1rem' }}>
+                <label style={{ fontSize: '0.85rem', color: '#334155' }}>Tag Quantity</label>
+                <input 
+                  type="number" 
+                  className="form-control" 
+                  placeholder="e.g. 50"
+                  value={rfidAmount}
+                  onChange={e => setRfidAmount(e.target.value)}
+                  style={{ backgroundColor: 'white', borderColor: '#cbd5e1' }}
+                  required
+                  min="1"
+                />
+              </div>
+              <button type="submit" className="btn" style={{ width: '100%', padding: '0.75rem', backgroundColor: '#475569', color: 'white', border: 'none' }}>Dispatch Tags</button>
+            </form>
           </div>
         )}
 

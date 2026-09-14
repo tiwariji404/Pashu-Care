@@ -21,6 +21,11 @@ export default function CowDetails() {
   const [isFilingComplaint, setIsFilingComplaint] = useState(false);
   const [reason, setReason] = useState('');
   const [photoPreview, setPhotoPreview] = useState(null);
+  
+  // Patrol Advanced Form Fields
+  const [animalState, setAnimalState] = useState('Calm / Safe');
+  const [landmark, setLandmark] = useState('');
+  const [issueFine, setIssueFine] = useState(false);
 
   if (!cow) {
     return (
@@ -33,8 +38,8 @@ export default function CowDetails() {
 
   const submitComplaint = (e) => {
     e.preventDefault();
-    if (!reason) {
-      alert("Please provide a reason.");
+    if (!reason || (user?.role === 'patrol_squad' && !landmark)) {
+      alert("Please provide the required details (reason/landmark).");
       return;
     }
 
@@ -52,7 +57,10 @@ export default function CowDetails() {
             timestamp: new Date().toISOString(),
             reporterPhone: user?.phone,
             reason: reason,
-            photo: photoPreview
+            photo: photoPreview,
+            animalState,
+            landmark,
+            issueFine
           };
 
           reportComplaint(complaintData);
@@ -60,6 +68,7 @@ export default function CowDetails() {
           setIsFilingComplaint(false);
           setReason('');
           setPhotoPreview(null);
+          setLandmark('');
           
           setTimeout(() => setComplaintStatus(''), 3000); // Clear success msg
         },
@@ -143,30 +152,40 @@ export default function CowDetails() {
                   <label htmlFor="camera-upload" className="btn btn-outline" style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', alignItems: 'center', padding: '1rem', cursor: 'pointer' }}>
                     <Camera size={20} /> Take Photo
                   </label>
-                  <input 
-                    id="camera-upload" 
-                    type="file" 
-                    accept="image/*" 
-                    capture="environment" 
-                    style={{ display: 'none' }} 
-                    onChange={handlePhotoCapture} 
-                  />
-                  {photoPreview && (
-                    <img src={photoPreview} alt="Evidence Preview" style={{ width: '100%', height: '150px', objectFit: 'cover', marginTop: '0.5rem', borderRadius: '4px' }} />
-                  )}
+                  <input id="camera-upload" type="file" accept="image/*" capture="environment" style={{ display: 'none' }} onChange={handlePhotoCapture} />
+                  {photoPreview && <img src={photoPreview} alt="Evidence Preview" style={{ width: '100%', height: '150px', objectFit: 'cover', marginTop: '0.5rem', borderRadius: '4px' }} />}
                 </div>
 
+                {user?.role === 'patrol_squad' && (
+                  <>
+                    <div className="form-group" style={{ margin: 0 }}>
+                      <label>Animal Condition</label>
+                      <select className="form-control" value={animalState} onChange={e => setAnimalState(e.target.value)}>
+                        <option>Calm / Safe</option>
+                        <option>Aggressive</option>
+                        <option>Injured / Sick</option>
+                        <option>Tied Up</option>
+                        <option>Roaming Free</option>
+                      </select>
+                    </div>
+                    <div className="form-group" style={{ margin: 0 }}>
+                      <label>Exact Landmark (Context)</label>
+                      <input type="text" className="form-control" placeholder="e.g. Near City Hospital Gate" value={landmark} onChange={e => setLandmark(e.target.value)} required />
+                    </div>
+                  </>
+                )}
+
                 <div className="form-group" style={{ margin: 0 }}>
-                  <label>Reason for Complaint</label>
-                  <textarea 
-                    className="form-control" 
-                    placeholder="e.g. Cow straying on highway, traffic block"
-                    rows="3"
-                    value={reason}
-                    onChange={e => setReason(e.target.value)}
-                    required
-                  ></textarea>
+                  <label>Reason for {user?.role === 'patrol_squad' ? 'Report' : 'Complaint'}</label>
+                  <textarea className="form-control" placeholder="e.g. Cow straying on highway, traffic block" rows="3" value={reason} onChange={e => setReason(e.target.value)} required></textarea>
                 </div>
+
+                {user?.role === 'patrol_squad' && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.5rem' }}>
+                    <input type="checkbox" id="issueFine" checked={issueFine} onChange={e => setIssueFine(e.target.checked)} style={{ width: 'auto' }} />
+                    <label htmlFor="issueFine" style={{ margin: 0, fontSize: '0.9rem' }}>Issue Municipal Fine (Strike)</label>
+                  </div>
+                )}
 
                 <button 
                   type="submit"
@@ -194,21 +213,30 @@ export default function CowDetails() {
         {complaints.length > 0 && (
           <div className="card" style={{ borderColor: 'var(--danger-color)' }}>
              <h2 className="card-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-               <FileText size={20} /> Digital E-Challans
+               <FileText size={20} /> Digital E-Challans / Alerts
              </h2>
              {complaints.map((c, i) => (
                <div key={i} style={{ borderBottom: i !== complaints.length -1 ? '1px solid var(--border-color)' : 'none', paddingBottom: '1rem', marginBottom: '1rem' }}>
                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                    <strong style={{ color: 'var(--danger-color)' }}>Strike {c.strikeLevel} Fine</strong>
+                    <strong style={{ color: c.type === 'alert' ? 'var(--primary-color)' : 'var(--danger-color)' }}>
+                      {c.type === 'alert' ? 'Lost/Found Alert' : `Strike ${c.strikeLevel} Fine`}
+                    </strong>
                     <span className="badge" style={{ 
-                      backgroundColor: c.status === 'paid' ? 'rgba(16, 185, 129, 0.1)' : c.status === 'disputed' ? '#fef3c7' : 'rgba(239, 68, 68, 0.1)', 
-                      color: c.status === 'paid' ? 'var(--primary-hover)' : c.status === 'disputed' ? '#d97706' : 'var(--danger-hover)' 
+                      backgroundColor: c.status === 'paid' ? 'rgba(16, 185, 129, 0.1)' : c.status === 'disputed' ? '#fef3c7' : c.status === 'alert_sent' ? 'rgba(56, 189, 248, 0.1)' : 'rgba(239, 68, 68, 0.1)', 
+                      color: c.status === 'paid' ? 'var(--primary-hover)' : c.status === 'disputed' ? '#d97706' : c.status === 'alert_sent' ? 'var(--primary-color)' : 'var(--danger-hover)' 
                     }}>
                       {c.status.toUpperCase()}
                     </span>
                  </div>
                  {c.fine > 0 && <h3 style={{ margin: '0.25rem 0' }}>₹{c.fine}</h3>}
-                 <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', margin: '0 0 0.5rem 0' }}>
+                 {c.animalState && <p style={{ fontSize: '0.85rem', margin: '0.25rem 0', color: 'var(--text-primary)' }}><strong>State:</strong> {c.animalState}</p>}
+                 {c.landmark && <p style={{ fontSize: '0.85rem', margin: '0.25rem 0', color: 'var(--text-primary)' }}><strong>Context:</strong> {c.landmark}</p>}
+                 {c.mapUrl && (
+                   <a href={c.mapUrl} target="_blank" rel="noreferrer" style={{ fontSize: '0.85rem', color: 'var(--primary-color)', display: 'inline-flex', alignItems: 'center', gap: '0.25rem', marginTop: '0.25rem', textDecoration: 'none' }}>
+                     <MapPin size={14} /> Open GPS Location
+                   </a>
+                 )}
+                 <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', margin: '0.5rem 0 0.5rem 0' }}>
                    {new Date(c.timestamp).toLocaleString()}
                  </p>
                  

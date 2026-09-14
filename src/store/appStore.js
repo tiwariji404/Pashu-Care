@@ -11,6 +11,7 @@ export const useAppStore = create((set, get) => ({
   vets: [],
   diseaseAlerts: [],
   ambulances: [],
+  warehouseInventory: 0,
 
   init: async () => {
     try {
@@ -21,6 +22,27 @@ export const useAppStore = create((set, get) => ({
       }
     } catch (e) {
       console.error('API Init Failed:', e);
+    }
+  },
+
+  allocateInventory: async (phone, amount) => {
+    try {
+      const res = await fetch('/api/inventory/transfer', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone, amount: Number(amount) })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        set(state => {
+          const users = state.users.map(u => 
+            u.phone === phone ? { ...u, inventory: data.inventory } : u
+          );
+          return { users, warehouseInventory: data.warehouseInventory };
+        });
+      }
+    } catch (e) {
+      console.error('Inventory Transfer Failed:', e);
     }
   },
 
@@ -137,24 +159,40 @@ export const useAppStore = create((set, get) => ({
       const cow = state.cows[cowIndex];
       if (cow.seized) return state;
 
-      const newStrikes = cow.strikes + 1;
+      let newStrikes = cow.strikes;
       let fine = 0;
       let seized = false;
+      let type = 'alert';
+      let status = 'alert_sent';
+      
+      let mapUrl = '';
+      if (complaintData.location) {
+        mapUrl = `https://maps.google.com/?q=${complaintData.location.lat},${complaintData.location.lng}`;
+      }
 
-      if (newStrikes === 1) fine = 1000;
-      else if (newStrikes === 2) fine = 3000;
-      else if (newStrikes >= 3) seized = true;
+      if (complaintData.issueFine) {
+        newStrikes += 1;
+        type = 'violation';
+        if (newStrikes === 1) fine = 1000;
+        else if (newStrikes === 2) fine = 3000;
+        else if (newStrikes >= 3) seized = true;
+        status = seized ? 'pending_seizure' : 'unpaid';
+      }
 
       const newComplaint = {
         ...complaintData,
+        mapUrl,
+        type,
         strikeLevel: newStrikes,
         fine,
-        status: seized ? 'pending_seizure' : 'unpaid',
+        status,
         id: Date.now().toString()
       };
 
       const updatedCows = [...state.cows];
-      updatedCows[cowIndex] = { ...cow, strikes: newStrikes, seized };
+      if (complaintData.issueFine) {
+        updatedCows[cowIndex] = { ...cow, strikes: newStrikes, seized };
+      }
 
       fetch('/api/complaints', {
         method: 'POST',
