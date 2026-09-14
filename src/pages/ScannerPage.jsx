@@ -11,7 +11,12 @@ export default function ScannerPage() {
   const getCowByQrId = useAppStore(state => state.getCowByQrId);
   const user = useAppStore(state => state.user);
 
+  const scannerInitialized = React.useRef(false);
+
   useEffect(() => {
+    if (scannerInitialized.current) return;
+    scannerInitialized.current = true;
+
     // Setup html5-qrcode scanner
     const scanner = new Html5QrcodeScanner(
       "reader",
@@ -39,7 +44,7 @@ export default function ScannerPage() {
 
   const processScannedCode = (uid) => {
     // 15-digit code validation (loose validation for demo purposes)
-    if (uid.length < 5) {
+    if (uid.length < 2) {
       setError("Invalid RFID tag. Code must be longer.");
       return;
     }

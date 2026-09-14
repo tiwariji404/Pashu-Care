@@ -13,7 +13,9 @@ export default function Dashboard() {
   const navigate = useNavigate();
   
   const seizedCows = cows.filter(c => c.seized);
-  const myAnimals = cows.filter(c => c.phone === user?.phone);
+  const myAnimals = cows.filter(c => c.phone === user?.phone && c.qrId !== '00');
+  
+  const myAnimalComplaints = complaints.filter(c => myAnimals.some(a => a.qrId === c.cowQrId) && (c.status === 'unpaid' || c.status === 'alert_sent' || c.status === 'pending_seizure'));
 
   const [assignPhone, setAssignPhone] = React.useState('');
   const [assignName, setAssignName] = React.useState('');
@@ -69,6 +71,22 @@ export default function Dashboard() {
           <UserCircle size={36} color="var(--primary-color)" />
         </div>
 
+        {/* Owner Alert Banner */}
+        {myAnimalComplaints.length > 0 && (
+          <div className="card" style={{ backgroundColor: 'var(--danger-color)', color: 'white', borderColor: 'var(--danger-hover)', marginBottom: '1.5rem' }}>
+            <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: '0 0 0.5rem 0', color: 'white' }}>
+              <AlertTriangle size={24} /> URGENT ALERT: Your Animal Reported!
+            </h3>
+            {myAnimalComplaints.map((c, i) => (
+              <div key={i} style={{ marginBottom: i !== myAnimalComplaints.length - 1 ? '1rem' : 0, paddingBottom: i !== myAnimalComplaints.length - 1 ? '1rem' : 0, borderBottom: i !== myAnimalComplaints.length - 1 ? '1px solid rgba(255,255,255,0.2)' : 'none' }}>
+                <strong style={{color: 'white'}}>ID: {c.cowQrId}</strong> has been reported roaming or causing issues.
+                <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.85rem', color: 'rgba(255,255,255,0.9)' }}>Reason: {c.reason || 'Wandering / Nuisance'}</p>
+                <button className="btn btn-outline" style={{ marginTop: '0.75rem', borderColor: 'rgba(255,255,255,0.5)', color: 'white', padding: '0.35rem 0.75rem', fontSize: '0.8rem' }} onClick={() => navigate(`/cow/${c.cowQrId}`)}>View Report Details</button>
+              </div>
+            ))}
+          </div>
+        )}
+
         {/* Quick Actions Navigation for Citizens */}
         {user?.role !== 'admin' && (
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '2rem' }}>
@@ -110,9 +128,15 @@ export default function Dashboard() {
              </button>
              <button 
                onClick={() => navigate('/adoption')} 
-               style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', padding: '1.5rem 0.5rem', border: '1px solid #f43f5e', borderRadius: '12px', backgroundColor: 'rgba(244, 63, 94, 0.05)', color: '#e11d48', cursor: 'pointer', textAlign: 'center', gridColumn: 'span 2' }}>
+               style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', padding: '1.5rem 0.5rem', border: '1px solid #f43f5e', borderRadius: '12px', backgroundColor: 'rgba(244, 63, 94, 0.05)', color: '#e11d48', cursor: 'pointer', textAlign: 'center' }}>
                <HeartHandshake size={28} />
                <strong style={{ fontSize: '0.9rem' }}>Adoption & Fostering</strong>
+             </button>
+             <button 
+               onClick={() => navigate('/my-animals')} 
+               style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', padding: '1.5rem 0.5rem', border: '1px solid #10b981', borderRadius: '12px', backgroundColor: 'rgba(16, 185, 129, 0.05)', color: '#059669', cursor: 'pointer', textAlign: 'center' }}>
+               <Package size={28} />
+               <strong style={{ fontSize: '0.9rem' }}>My Animals</strong>
              </button>
           </div>
         )}
@@ -245,34 +269,6 @@ export default function Dashboard() {
           </div>
         )}
 
-        {user?.role !== 'admin' && (
-          <div style={{ marginBottom: '2rem' }}>
-            <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
-               <img src="/src/assets/safe cow.png" alt="Cow" style={{ width: '24px', height: '24px', objectFit: 'contain' }} />
-               My Animals
-            </h3>
-            {myAnimals.length > 0 ? (
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                {myAnimals.map((animal, idx) => (
-                  <div 
-                    key={idx} 
-                    onClick={() => navigate(`/cow/${animal.qrId}`)}
-                    style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', padding: '1.5rem 0.5rem', border: '1px solid var(--primary-color)', borderRadius: '12px', backgroundColor: 'rgba(16, 185, 129, 0.05)', color: 'var(--primary-hover)', cursor: 'pointer', textAlign: 'center' }}
-                  >
-                    <img src="/src/assets/safe cow.png" alt="Cow" style={{ width: '32px', height: '32px', objectFit: 'contain' }} />
-                    <strong style={{ fontSize: '0.9rem' }}>{animal.breed || animal.species}</strong>
-                    <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>ID: {animal.qrId}</span>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="card" style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>
-                No animals registered under this number.
-              </div>
-            )}
-          </div>
-        )}
-
         <button 
           className="btn btn-primary" 
           onClick={() => navigate('/scan')}
@@ -289,32 +285,62 @@ export default function Dashboard() {
         )}
 
         <div style={{ marginTop: '2rem' }}>
-          <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
-            <AlertCircle size={20} color="var(--text-primary)" /> Global Ledger
-          </h3>
-          
-          {complaints.length === 0 ? (
-            <p className="card" style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>
-              No recent patrol violations reported yet.
-            </p>
-          ) : (
-            complaints.map((c, i) => (
-              <div key={i} className="card" style={{ borderLeft: `4px solid ${c.status === 'pending_seizure' ? 'var(--danger-color)' : 'var(--primary-color)'}` }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                  <strong>Strike {c.strikeLevel} Violation</strong>
-                  <span className="badge" style={{ backgroundColor: c.status === 'paid' ? 'var(--bg-color)' : 'rgba(239, 68, 68, 0.1)', color: c.status === 'paid' ? 'var(--text-secondary)' : 'var(--danger-color)' }}>
-                    {c.status.toUpperCase()}
-                  </span>
-                </div>
-                <p style={{ margin: '0.25rem 0', fontSize: '0.875rem' }}>Cow ID: {c.cowQrId}</p>
-                {c.fine > 0 && <p style={{ margin: '0', fontSize: '0.875rem', fontWeight: 600 }}>Fine: ₹{c.fine}</p>}
-                <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>
-                  Loc: {c.location.lat.toFixed(4)}, {c.location.lng.toFixed(4)}
-                  <br />Time: {new Date(c.timestamp).toLocaleString()}
-                </div>
-              </div>
-            ))
-          )}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1rem' }}>
+            <div>
+              <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
+                <AlertCircle size={20} color="var(--text-primary)" /> {user?.role === 'admin' ? 'Global Ledger' : 'Area Violations'}
+              </h3>
+              
+              {complaints.length === 0 ? (
+                <p className="card" style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>
+                  No recent patrol violations or reports yet.
+                </p>
+              ) : (
+                complaints.map((c, i) => (
+                  <div key={i} className="card" style={{ borderLeft: `4px solid ${c.status === 'pending_seizure' ? 'var(--danger-color)' : (c.type === 'alert' ? '#eab308' : 'var(--primary-color)')}`, marginBottom: '1rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                      <strong>{c.type === 'alert' ? 'Community Report' : `Strike ${c.strikeLevel} Violation`}</strong>
+                      <span className="badge" style={{ backgroundColor: c.status === 'paid' ? 'var(--bg-color)' : 'rgba(239, 68, 68, 0.1)', color: c.status === 'paid' ? 'var(--text-secondary)' : 'var(--danger-color)' }}>
+                        {c.status.toUpperCase()}
+                      </span>
+                    </div>
+                    <p style={{ margin: '0.25rem 0', fontSize: '0.875rem' }}>Cow ID: {c.cowQrId}</p>
+                    {c.reason && <p style={{ margin: '0', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Issue: {c.reason}</p>}
+                    {c.fine > 0 && <p style={{ margin: '0', fontSize: '0.875rem', fontWeight: 600 }}>Fine: ₹{c.fine}</p>}
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>
+                      Loc: {c.location.lat.toFixed(4)}, {c.location.lng.toFixed(4)}
+                      <br />Time: {new Date(c.timestamp).toLocaleString()}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            <div>
+              <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
+                <MapPin size={20} color="#eab308" /> Spotted / Missing Animals
+              </h3>
+              
+              {missingReports.length === 0 ? (
+                <p className="card" style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>
+                  No missing or spotted animals reported.
+                </p>
+              ) : (
+                missingReports.map((r, i) => (
+                  <div key={i} className="card" style={{ borderLeft: `4px solid ${r.status === 'missing' ? 'var(--danger-color)' : '#eab308'}`, marginBottom: '1rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                      <strong>{r.status === 'missing' ? 'Reported Missing' : 'Animal Spotted'}</strong>
+                    </div>
+                    <p style={{ margin: '0.25rem 0', fontSize: '0.875rem' }}>Location: {r.location}</p>
+                    <p style={{ margin: '0', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Info: {r.description}</p>
+                    <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                      Contact: {r.reporterPhone}
+                    </p>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </>

@@ -19,6 +19,31 @@ export const useAppStore = create(
 
   init: async () => {
     try {
+      // Demo injection for 00 tag
+      set(state => {
+        const hasDemo = state.cows.some(c => c.qrId === '00');
+        if (!hasDemo) {
+          const demoCow = {
+            qrId: "00",
+            species: "Cow",
+            breed: "Gir (Demo)",
+            age: 5,
+            health: "Good",
+            vaccination: "2026-01-15",
+            ownerName: "Ramesh Kumar",
+            aadhar: "987654321012",
+            phone: "9876543210", 
+            address: "Kisan Dairy Farm, Main Road",
+            photos: ["mock_photo_url"],
+            registeredAt: new Date().toISOString(),
+            strikes: 0,
+            seized: false
+          };
+          return { cows: [demoCow, ...state.cows] };
+        }
+        return state;
+      });
+
       const res = await fetch('/api/state');
       if (res.ok) {
         const data = await res.json();

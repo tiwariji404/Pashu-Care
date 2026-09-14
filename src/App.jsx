@@ -19,6 +19,7 @@ import UserProfile from './pages/UserProfile';
 import WorkerProfile from './pages/WorkerProfile';
 import AgentList from './pages/AgentList';
 import AdoptionPortal from './pages/AdoptionPortal';
+import MyAnimals from './pages/MyAnimals';
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -49,6 +50,7 @@ function App() {
           <Route path="/profile" element={<ProtectedRoute><UserProfile /></ProtectedRoute>} />
           <Route path="/worker/:phone" element={<ProtectedRoute><WorkerProfile /></ProtectedRoute>} />
           <Route path="/adoption" element={<ProtectedRoute><AdoptionPortal /></ProtectedRoute>} />
+          <Route path="/my-animals" element={<ProtectedRoute><MyAnimals /></ProtectedRoute>} />
           <Route path="/admin/agents/:role" element={<ProtectedRoute><AgentList /></ProtectedRoute>} />
         </Routes>
       </div>
