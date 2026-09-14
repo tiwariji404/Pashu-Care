@@ -1,7 +1,10 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 
-export const useAppStore = create((set, get) => ({
-  user: null,
+export const useAppStore = create(
+  persist(
+    (set, get) => ({
+      user: null,
   users: [],
   cows: [], 
   complaints: [],
@@ -279,7 +282,13 @@ export const useAppStore = create((set, get) => ({
       };
     });
   }
-}));
+    }),
+    {
+      name: 'pashu-care-storage',
+      partialize: (state) => ({ user: state.user })
+    }
+  )
+);
 
 // Initialize store with fetching backend state once
 useAppStore.getState().init();

@@ -5,7 +5,7 @@ import { initReactI18next } from 'react-i18next';
 const resources = {
   en: {
     translation: {
-      "app_title": "Safe Cow",
+      "app_title": "Pashu Care",
       "admin_badge": "Admin",
       "citizen": "Citizen",
       "hq": "HQ",
@@ -42,7 +42,7 @@ const resources = {
       "fine": "Fine",
       "loc": "Loc",
       "time": "Time",
-      "login_title": "Login to Safe Cow",
+      "login_title": "Login to Pashu Care",
       "enter_phone": "Enter Phone Number",
       "login_btn": "Login / Register",
       "alert_invalid_phone": "Please enter a valid 10-digit phone number.",

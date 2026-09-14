@@ -50,7 +50,7 @@ export default function Dashboard() {
     <>
       <div className="header">
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <img src="/src/assets/safe cow.png" alt="Safe Cow" style={{ width: '32px', height: '32px', objectFit: 'contain' }} />
+          <img src="/src/assets/pashu care.png" alt="Pashu Care" style={{ width: '32px', height: '32px', objectFit: 'contain' }} />
           <h1 style={{ margin: 0 }}>{t('app_title')}</h1>
         </div>
         {user?.role === 'admin' && <span className="badge" style={{ marginLeft: '0.5rem' }}>{t('admin_badge')}</span>}

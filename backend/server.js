@@ -37,7 +37,7 @@ let state = {
     { id: 2, name: "Dr. Sunita Sharma", specialization: "Dairy Nutrition Expert", location: "Garhwa", phone: "9000100022", clinic: "Govt Vet Hospital, City Center" },
     { id: 3, name: "Dr. Amit Patel", specialization: "Emergency Care", location: "Ranchi", phone: "9000100023", clinic: "Ranchi Care" },
     { id: 4, name: "Dr. Vikas Singh", specialization: "Surgery & Trauma", location: "Garhwa", phone: "9000100024", clinic: "Kisan Vet Clinic" },
-    { id: 5, name: "Dr. Anjali Pandey", specialization: "Obstetrics (Pregnancy Care)", location: "Garhwa", phone: "9000100025", clinic: "Safe Cow Care Center" },
+    { id: 5, name: "Dr. Anjali Pandey", specialization: "Obstetrics (Pregnancy Care)", location: "Garhwa", phone: "9000100025", clinic: "Pashu Care Center" },
     { id: 6, name: "Dr. Rohan Verma", specialization: "General Cattle Health", location: "Hazaribagh", phone: "9000100026", clinic: "Hazaribagh Vet Hospital" }
   ],
   diseaseAlerts: [
