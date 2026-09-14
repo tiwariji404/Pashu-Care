@@ -53,7 +53,8 @@ let state = {
   warehouseInventory: 50000,
   adoptions: [
     { id: 'ad1', type: 'Cow', breed: 'Sahiwal', age: 3, health: 'Healthy', photo: 'https://images.unsplash.com/photo-1546445317-29f4545e9d53?w=500&q=80', description: 'Very calm. Rescued from highway.', status: 'available', requests: [] }
-  ]
+  ],
+  notifications: []
 };
 
 // API: GET FULL STATE (For simple initial load)
@@ -69,7 +70,8 @@ app.get('/api/state', (req, res) => {
     diseaseAlerts: state.diseaseAlerts,
     ambulances: state.ambulances,
     warehouseInventory: state.warehouseInventory,
-    adoptions: state.adoptions
+    adoptions: state.adoptions,
+    notifications: state.notifications
   });
 });
 
@@ -271,6 +273,14 @@ app.post('/api/adoptions/request', (req, res) => {
   } else {
     res.status(404).json({ error: 'Listing not found' });
   }
+});
+
+// API: NOTIFICATIONS
+app.post('/api/notifications', (req, res) => {
+  const notifData = req.body;
+  const newNotif = { ...notifData, id: Date.now().toString(), timestamp: new Date().toISOString(), read: false };
+  state.notifications.unshift(newNotif);
+  res.json({ success: true, notifications: state.notifications });
 });
 
 const PORT = 3001;

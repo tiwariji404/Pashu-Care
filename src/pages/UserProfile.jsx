@@ -5,7 +5,7 @@ import { useAppStore } from '../store/appStore';
 
 export default function UserProfile() {
   const navigate = useNavigate();
-  const { user, logout, missingReports } = useAppStore();
+  const { user, logout, missingReports, notifications } = useAppStore();
   
   if (!user) return null;
 
@@ -51,6 +51,23 @@ export default function UserProfile() {
              <h2 style={{ margin: 0, color: '#166534', fontSize: '1.75rem' }}>Active</h2>
              <span style={{ fontSize: '0.8rem', color: 'var(--primary-color)', fontWeight: 500 }}>Account Status</span>
           </div>
+        </div>
+
+        <h3 style={{ marginBottom: '1rem', color: 'var(--text-primary)' }}>Important Notifications</h3>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '2rem' }}>
+          {notifications?.filter(n => n.targetPhone === user.phone).length === 0 ? (
+            <p className="card" style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>You have no new notifications.</p>
+          ) : (
+            notifications?.filter(n => n.targetPhone === user.phone).map((notif, idx) => (
+              <div key={idx} className="card" style={{ borderLeft: '4px solid var(--danger-color)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                  <strong>{notif.type.toUpperCase()} ALERT</strong>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{new Date(notif.timestamp).toLocaleString()}</span>
+                </div>
+                <p style={{ margin: 0, fontSize: '0.9rem' }}>{notif.message}</p>
+              </div>
+            ))
+          )}
         </div>
 
         <button 

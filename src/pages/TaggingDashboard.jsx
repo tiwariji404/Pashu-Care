@@ -8,7 +8,9 @@ export default function TaggingDashboard() {
   const { user, cows } = useAppStore();
   const navigate = useNavigate();
 
-  const myTagsToday = cows.length; // Simplified
+  // For demo, we assume all cows in state were tagged by this agent
+  const myCows = cows;
+  const myTagsToday = myCows.length;
 
   return (
     <>
@@ -40,22 +42,29 @@ export default function TaggingDashboard() {
           <PlusCircle size={24} /> Register New Cattle (Scan Tag)
         </button>
 
-        <h3 style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Activity size={20} /> Recent Registrations</h3>
+        <h3 style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Activity size={20} /> All Tagging Details (History)</h3>
         
-        {cows.length === 0 ? (
+        {myCows.length === 0 ? (
           <p className="card" style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>
-            No registrations yet.
+            No cattle tags registered yet. Start scanning to build your history!
           </p>
         ) : (
-          cows.slice(0, 3).map((c, i) => (
-            <div key={i} className="card" style={{ marginBottom: '0.75rem', padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div>
-                <strong style={{ display: 'block', fontSize: '0.95rem' }}>{c.breed} (ID: {c.qrId.substring(0, 8)}...)</strong>
-                <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Owner: {c.ownerName}</span>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            {myCows.map((c, i) => (
+              <div key={i} className="card" style={{ padding: '1rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
+                  <strong style={{ display: 'block', fontSize: '1rem', color: 'var(--primary-color)' }}>UID: {c.qrId}</strong>
+                  <span className="badge" style={{ backgroundColor: 'rgba(16, 185, 129, 0.1)', color: 'var(--primary-hover)' }}>Registered</span>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', fontSize: '0.85rem' }}>
+                  <p style={{ margin: 0 }}><strong>Breed:</strong> {c.breed}</p>
+                  <p style={{ margin: 0 }}><strong>Owner:</strong> {c.ownerName}</p>
+                  <p style={{ margin: 0 }}><strong>Phone:</strong> {c.ownerPhone || 'N/A'}</p>
+                  <p style={{ margin: 0 }}><strong>Loc:</strong> {c.location ? `${c.location.lat?.toFixed(3)}, ${c.location.lng?.toFixed(3)}` : 'HQ'}</p>
+                </div>
               </div>
-              <span className="badge" style={{ backgroundColor: 'rgba(16, 185, 129, 0.1)', color: 'var(--primary-color)' }}>Success</span>
-            </div>
-          ))
+            ))}
+          </div>
         )}
       </div>
     </>

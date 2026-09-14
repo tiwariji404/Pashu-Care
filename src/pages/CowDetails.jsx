@@ -13,6 +13,7 @@ export default function CowDetails() {
   const payChallan = useAppStore(state => state.payChallan);
   const disputeChallan = useAppStore(state => state.disputeChallan);
   const addMissingReport = useAppStore(state => state.addMissingReport);
+  const addNotification = useAppStore(state => state.addNotification);
 
   const cow = getCowByQrId(qrId);
   const complaints = getComplaintsByQrId(qrId);
@@ -65,16 +66,22 @@ export default function CowDetails() {
 
           reportComplaint(complaintData);
           
-          if (user?.role !== 'patrol_squad' && user?.role !== 'admin') {
-            addMissingReport({
-              ownerName: cow.ownerName,
-              location: user?.location || 'Garhwa',
-              reporterPhone: user?.phone,
-              photo: photoPreview || 'https://images.unsplash.com/photo-1546445317-29f4545e9d53?w=500&q=80',
-              status: 'spotted',
-              description: `Spotted Animal (Tag: ${qrId}). Note: ${reason}`
-            });
-          }
+          // Add to Area Feed for BOTH Patrol and Citizens
+          addMissingReport({
+            ownerName: cow.ownerName,
+            location: user?.location || 'Garhwa',
+            reporterPhone: user?.phone,
+            photo: photoPreview || 'https://images.unsplash.com/photo-1546445317-29f4545e9d53?w=500&q=80',
+            status: 'spotted',
+            description: `${user?.role === 'patrol_squad' ? '[PATROL SQUAD] ' : ''}Spotted Animal (Tag: ${qrId}). Note: ${reason}`
+          });
+          
+          // Send Real-Time Notification to Owner
+          addNotification({
+            targetPhone: cow.ownerPhone || '9999999999',
+            message: `Your animal (Tag: ${qrId}) was reported as spotted/stray by ${user?.name || 'someone'}. Location: ${user?.location || 'Unknown'}. Note: ${reason}.`,
+            type: 'alert'
+          });
           
           setComplaintStatus('reported');
           setIsFilingComplaint(false);

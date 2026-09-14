@@ -50,10 +50,10 @@ export default function ScannerPage() {
       navigate(`/cow/${uid}`);
     } else {
       // Not registered
-      if (user.role === 'tagging_agent') {
+      if (user?.role === 'tagging_agent') {
         navigate(`/register/${uid}`);
       } else {
-        setError(`Unregistered Tag (${uid}). Only Tagging Agents can register new cattle.`);
+        setError(`Not Found! The Tag (${uid}) is not registered in the database.`);
       }
     }
   };
