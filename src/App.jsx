@@ -1,7 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useAppStore } from './store/appStore';
-import LanguageSwitcher from './components/LanguageSwitcher';
 
 // Pages
 import Login from './pages/Login';
@@ -33,7 +32,6 @@ const ProtectedRoute = ({ children }) => {
 function App() {
   return (
     <Router>
-      <LanguageSwitcher />
       <div className="container">
         <Routes>
           <Route path="/login" element={<Login />} />

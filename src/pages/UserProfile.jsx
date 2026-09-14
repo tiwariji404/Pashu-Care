@@ -1,11 +1,13 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, UserCircle, MapPin, Phone, LogOut, FileText, CheckCircle } from 'lucide-react';
+import { ArrowLeft, UserCircle, MapPin, Phone, LogOut, FileText, CheckCircle, Globe } from 'lucide-react';
 import { useAppStore } from '../store/appStore';
+import { useTranslation } from 'react-i18next';
 
 export default function UserProfile() {
   const navigate = useNavigate();
   const { user, logout, missingReports, notifications } = useAppStore();
+  const { t, i18n } = useTranslation();
   
   if (!user) return null;
 
@@ -21,7 +23,7 @@ export default function UserProfile() {
       <div className="header" style={{ borderBottom: 'none' }}>
         <h1>
           <ArrowLeft size={24} onClick={() => navigate('/')} style={{cursor:'pointer'}} /> 
-          My Profile
+          {t('my_profile') || 'My Profile'}
         </h1>
       </div>
       
@@ -34,29 +36,29 @@ export default function UserProfile() {
             <Phone size={16} /> {user.phone}
           </p>
           <div style={{ marginTop: '1rem' }}>
-            <span className="badge">{user.role === 'admin' ? 'Official Admin' : 'Verified Citizen'}</span>
+            <span className="badge">{user.role === 'admin' ? (t('admin') || 'Administrator') : (t('citizen') || 'Verified Citizen')}</span>
           </div>
         </div>
 
-        <h3 style={{ marginBottom: '1rem', color: 'var(--text-primary)' }}>Account Activity</h3>
+        <h3 style={{ marginBottom: '1rem', color: 'var(--text-primary)' }}>{t('account_activity') || 'Account Activity'}</h3>
         
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '2rem' }}>
           <div className="card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '1.5rem', gap: '0.5rem', backgroundColor: '#eff6ff', borderColor: '#bfdbfe' }}>
              <FileText size={24} color="#3b82f6" />
              <h2 style={{ margin: 0, color: '#1e3a8a', fontSize: '1.75rem' }}>{userReports}</h2>
-             <span style={{ fontSize: '0.8rem', color: '#3b82f6', fontWeight: 500 }}>Filed Reports</span>
+             <span style={{ fontSize: '0.8rem', color: '#3b82f6', fontWeight: 500 }}>{t('filed_reports') || 'Filed Reports'}</span>
           </div>
           <div className="card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '1.5rem', gap: '0.5rem', backgroundColor: '#f0fdf4', borderColor: '#bbf7d0' }}>
              <CheckCircle size={24} color="var(--primary-color)" />
-             <h2 style={{ margin: 0, color: '#166534', fontSize: '1.75rem' }}>Active</h2>
-             <span style={{ fontSize: '0.8rem', color: 'var(--primary-color)', fontWeight: 500 }}>Account Status</span>
+             <h2 style={{ margin: 0, color: '#166534', fontSize: '1.75rem' }}>{t('active') || 'Active'}</h2>
+             <span style={{ fontSize: '0.8rem', color: 'var(--primary-color)', fontWeight: 500 }}>{t('account_status') || 'Account Status'}</span>
           </div>
         </div>
 
-        <h3 style={{ marginBottom: '1rem', color: 'var(--text-primary)' }}>Important Notifications</h3>
+        <h3 style={{ marginBottom: '1rem', color: 'var(--text-primary)' }}>{t('important_notifications') || 'Important Notifications'}</h3>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '2rem' }}>
           {notifications?.filter(n => n.targetPhone === user.phone).length === 0 ? (
-            <p className="card" style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>You have no new notifications.</p>
+            <p className="card" style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>{t('no_new_notifications') || 'You have no new notifications.'}</p>
           ) : (
             notifications?.filter(n => n.targetPhone === user.phone).map((notif, idx) => (
               <div key={idx} className="card" style={{ borderLeft: '4px solid var(--danger-color)' }}>
@@ -70,12 +72,48 @@ export default function UserProfile() {
           )}
         </div>
 
+        <div className="card" style={{ marginBottom: '2rem' }}>
+          <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: '0 0 1rem 0' }}>
+            <Globe size={20} color="var(--primary-color)" /> {t('language_settings') || 'Language Settings'}
+          </h3>
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <button 
+              onClick={() => i18n.changeLanguage('en')}
+              className="btn"
+              style={{ 
+                flex: 1,
+                padding: '0.5rem', 
+                backgroundColor: i18n.language === 'en' ? 'var(--primary-color)' : 'transparent',
+                color: i18n.language === 'en' ? 'white' : 'var(--text-primary)',
+                borderColor: i18n.language === 'en' ? 'var(--primary-color)' : 'var(--border-color)',
+                fontSize: '0.9rem'
+              }}
+            >
+              English
+            </button>
+            <button 
+              onClick={() => i18n.changeLanguage('hi')}
+              className="btn"
+              style={{ 
+                flex: 1,
+                padding: '0.5rem', 
+                backgroundColor: i18n.language === 'hi' ? 'var(--primary-color)' : 'transparent',
+                color: i18n.language === 'hi' ? 'white' : 'var(--text-primary)',
+                borderColor: i18n.language === 'hi' ? 'var(--primary-color)' : 'var(--border-color)',
+                fontSize: '0.9rem'
+              }}
+            >
+              हिंदी (Hindi)
+            </button>
+          </div>
+        </div>
+
         <button 
           onClick={handleLogout} 
           className="btn btn-outline" 
           style={{ width: '100%', display: 'flex', justifyContent: 'center', gap: '0.5rem', color: 'var(--danger-color)', borderColor: 'rgba(239, 68, 68, 0.2)' }}
         >
-          <LogOut size={20} /> Secure Logout
+          <LogOut size={20} /> {t('logout') || 'Secure Logout'}
         </button>
       </div>
     </>
