@@ -94,9 +94,11 @@ export default function MissingZone() {
                 <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
                   <MapPin size={20} color="#eab308" /> Spotted Animals in Area
                 </h3>
-                {areaReports.length > 0 ? areaReports.map(r => (
-                  <ReportCard key={r.id} report={r} />
-                )) : <p style={{textAlign:'center', marginTop:'2rem', color:'var(--text-secondary)'}}>No spotted animal reports in your area.</p>}
+                <div className="responsive-grid">
+                  {areaReports.length > 0 ? areaReports.map(r => (
+                    <ReportCard key={r.id} report={r} />
+                  )) : <p style={{textAlign:'center', marginTop:'2rem', color:'var(--text-secondary)'}}>No spotted animal reports in your area.</p>}
+                </div>
               </div>
             )}
 
@@ -105,17 +107,21 @@ export default function MissingZone() {
                 <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
                   <AlertTriangle size={20} color="var(--danger-color)" /> Missing Animals
                 </h3>
-                {missingAnimalReports.length > 0 ? missingAnimalReports.map(r => (
-                  <ReportCard key={r.id} report={r} />
-                )) : <p style={{textAlign:'center', marginTop:'2rem', color:'var(--text-secondary)'}}>No missing animal reports.</p>}
+                <div className="responsive-grid">
+                  {missingAnimalReports.length > 0 ? missingAnimalReports.map(r => (
+                    <ReportCard key={r.id} report={r} />
+                  )) : <p style={{textAlign:'center', marginTop:'2rem', color:'var(--text-secondary)'}}>No missing animal reports.</p>}
+                </div>
               </div>
             )}
             
             {tab === 'my' && (
               <div>
-                {myReports.length > 0 ? myReports.map(r => (
-                  <ReportCard key={r.id} report={r} />
-                )) : <p style={{textAlign:'center', marginTop:'2rem', color:'var(--text-secondary)'}}>You haven't filed any missing reports.</p>}
+                <div className="responsive-grid">
+                  {myReports.length > 0 ? myReports.map(r => (
+                    <ReportCard key={r.id} report={r} />
+                  )) : <p style={{textAlign:'center', marginTop:'2rem', color:'var(--text-secondary)'}}>You haven't filed any missing reports.</p>}
+                </div>
               </div>
             )}
           </>

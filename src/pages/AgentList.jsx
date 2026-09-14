@@ -34,7 +34,7 @@ export default function AgentList() {
           Total Assigned: <strong>{agents.length}</strong>
         </p>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <div className="responsive-grid">
           {agents.map(worker => {
             const inv = worker.inventory || { total: 0, remaining: 0, label: 'Task' };
             const used = inv.total - inv.remaining;

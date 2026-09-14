@@ -58,7 +58,7 @@ export default function Login() {
   };
 
   return (
-      <div className="content" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', height: '100%' }}>
+    <div className="login-wrapper">
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
           <img src="/src/assets/pashu care.png" alt="Pashu Care Logo" style={{ width: '120px', height: '120px', objectFit: 'contain', margin: '0 auto' }} />
           <h1 style={{ marginTop: '0.5rem', color: 'var(--primary-color)' }}>{t('app_title')}</h1>
