@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAppStore } from '../store/appStore';
 import { ShieldCheck, ArrowRight } from 'lucide-react';
 
 export default function Login() {
+  const { t } = useTranslation();
   const [phone, setPhone] = useState('');
   const [otp, setOtp] = useState('');
   const [name, setName] = useState('');
@@ -59,7 +61,7 @@ export default function Login() {
     <div className="content" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', height: '100%' }}>
       <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
         <img src="/src/assets/safe cow.png" alt="Safe Cow Logo" style={{ width: '120px', height: '120px', objectFit: 'contain', margin: '0 auto' }} />
-        <h1 style={{ marginTop: '0.5rem', color: 'var(--primary-color)' }}>Safe Cow</h1>
+        <h1 style={{ marginTop: '0.5rem', color: 'var(--primary-color)' }}>{t('app_title')}</h1>
         <p>Digital Patrol & Registration System</p>
       </div>
 
