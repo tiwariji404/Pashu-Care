@@ -212,3 +212,26 @@ p { color: var(--text-secondary); margin-bottom: 1rem; }
   border: 1px solid var(--border-color);
   background: #000;
 }
+
+/* 📱 Responsive Desktop / Web Adjustments 📱 */
+/* When viewed on tablets/laptops, break out of the 480px mobile app constraint */
+@media (min-width: 768px) {
+  .container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    border-radius: 12px;
+    min-height: calc(100vh - 4rem);
+    border: 1px solid var(--border-color);
+  }
+
+  /* Keep forms readable by preventing them from stretching 1200px wide */
+  form {
+    max-width: 600px;
+  }
+
+  /* Ensure the header blends with the new rounded container corners */
+  .header {
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+  }
+}
