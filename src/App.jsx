@@ -8,7 +8,7 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import ScannerPage from './pages/ScannerPage';
 import CowDetails from './pages/CowDetails';
-import AdminRegistration from './pages/AdminRegistration';
+import AgentRegistration from './pages/AgentRegistration';
 import MissingZone from './pages/MissingZone';
 import GaushalaList from './pages/GaushalaList';
 import VetList from './pages/VetList';
@@ -36,7 +36,7 @@ function App() {
           <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
           <Route path="/scan" element={<ProtectedRoute><ScannerPage /></ProtectedRoute>} />
           <Route path="/cow/:qrId" element={<ProtectedRoute><CowDetails /></ProtectedRoute>} />
-          <Route path="/register/:qrId" element={<ProtectedRoute><AdminRegistration /></ProtectedRoute>} />
+          <Route path="/register/:qrId" element={<ProtectedRoute><AgentRegistration /></ProtectedRoute>} />
           <Route path="/missing" element={<ProtectedRoute><MissingZone /></ProtectedRoute>} />
           <Route path="/gaushalas" element={<ProtectedRoute><GaushalaList /></ProtectedRoute>} />
           <Route path="/vets" element={<ProtectedRoute><VetList /></ProtectedRoute>} />

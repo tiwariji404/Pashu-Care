@@ -23,7 +23,9 @@ export default function ManagerDashboard() {
       </div>
       
       <div className="content">
-        <div style={{ marginBottom: '1.5rem', padding: '1rem', backgroundColor: 'var(--surface-color)', borderRadius: 'var(--border-radius)', border: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div 
+          onClick={() => navigate('/profile')}
+          style={{ marginBottom: '1.5rem', cursor: 'pointer', padding: '1rem', backgroundColor: 'var(--surface-color)', borderRadius: 'var(--border-radius)', border: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div>
             <h2 style={{ margin: '0 0 0.25rem 0' }}>Welcome, {user?.name}</h2>
             <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Manager @ {user?.location || 'HQ'}</p>

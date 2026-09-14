@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Camera, MapPin, CheckCircle, ArrowLeft } from 'lucide-react';
 import { useAppStore } from '../store/appStore';
 
-export default function AdminRegistration() {
+export default function AgentRegistration() {
   const { qrId } = useParams();
   const navigate = useNavigate();
   const registerCow = useAppStore(state => state.registerCow);
@@ -94,6 +94,7 @@ export default function AdminRegistration() {
                 <option value="Cow">Cow</option>
                 <option value="Buffalo">Buffalo</option>
                 <option value="Bull">Bull</option>
+                <option value="Dog">Dog</option>
               </select>
             </div>
             <div className="form-group">
