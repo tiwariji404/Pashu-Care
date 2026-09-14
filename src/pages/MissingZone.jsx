@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, PlusCircle, AlertTriangle, MapPin, Camera, X } from 'lucide-react';
+import { ArrowLeft, PlusCircle, AlertTriangle, MapPin, Camera, X, AlertCircle, FileText } from 'lucide-react';
 import { useAppStore } from '../store/appStore';
 
 export default function MissingZone() {
   const navigate = useNavigate();
-  const { user, missingReports, addMissingReport } = useAppStore();
+  const { user, missingReports, addMissingReport, complaints } = useAppStore();
   const [tab, setTab] = useState('all'); // 'all' or 'my'
   
   const [isReporting, setIsReporting] = useState(false);
@@ -14,7 +14,8 @@ export default function MissingZone() {
   
   const userLocation = user?.location || 'Garhwa';
   
-  const areaReports = missingReports.filter(r => r.location.toLowerCase() === userLocation.toLowerCase());
+  const areaReports = missingReports.filter(r => r.location.toLowerCase() === userLocation.toLowerCase() && r.status === 'spotted');
+  const missingAnimalReports = missingReports.filter(r => r.status === 'missing');
   const myReports = missingReports.filter(r => r.reporterPhone === user?.phone);
   
   const handlePhotoCapture = (e) => {
@@ -51,8 +52,8 @@ export default function MissingZone() {
     <>
       <div className="header" style={{ borderBottom: 'none' }}>
         <h1>
-          <ArrowLeft size={24} onClick={() => navigate('/')} style={{cursor:'pointer'}} /> 
-          <AlertTriangle color="#ef4444" /> Missing & Spotted
+          <ArrowLeft size={24} onClick={() => navigate('/')} style={{cursor:'pointer'}} color="var(--text-primary)" /> 
+          <FileText color="var(--primary-color)" /> Area Reports
         </h1>
       </div>
       
@@ -63,6 +64,12 @@ export default function MissingZone() {
           style={{ flex: 1, padding: '1rem 0', textAlign: 'center', cursor: 'pointer', borderBottom: tab === 'all' ? '2px solid var(--primary-color)' : '2px solid transparent', color: tab === 'all' ? 'var(--primary-color)' : 'var(--text-secondary)', fontWeight: tab === 'all' ? 600 : 400 }}
         >
           Area Reports
+        </div>
+        <div 
+          onClick={() => setTab('missing')}
+          style={{ flex: 1, padding: '1rem 0', textAlign: 'center', cursor: 'pointer', borderBottom: tab === 'missing' ? '2px solid var(--primary-color)' : '2px solid transparent', color: tab === 'missing' ? 'var(--primary-color)' : 'var(--text-secondary)', fontWeight: tab === 'missing' ? 600 : 400 }}
+        >
+          Missing
         </div>
         <div 
           onClick={() => setTab('my')}
@@ -84,9 +91,23 @@ export default function MissingZone() {
             
             {tab === 'all' && (
               <div>
+                <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
+                  <MapPin size={20} color="#eab308" /> Spotted Animals in Area
+                </h3>
                 {areaReports.length > 0 ? areaReports.map(r => (
                   <ReportCard key={r.id} report={r} />
-                )) : <p style={{textAlign:'center', marginTop:'2rem', color:'var(--text-secondary)'}}>No missing reports in your area.</p>}
+                )) : <p style={{textAlign:'center', marginTop:'2rem', color:'var(--text-secondary)'}}>No spotted animal reports in your area.</p>}
+              </div>
+            )}
+
+            {tab === 'missing' && (
+              <div>
+                <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
+                  <AlertTriangle size={20} color="var(--danger-color)" /> Missing Animals
+                </h3>
+                {missingAnimalReports.length > 0 ? missingAnimalReports.map(r => (
+                  <ReportCard key={r.id} report={r} />
+                )) : <p style={{textAlign:'center', marginTop:'2rem', color:'var(--text-secondary)'}}>No missing animal reports.</p>}
               </div>
             )}
             

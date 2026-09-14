@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAppStore } from '../store/appStore';
-import { ScanLine, ShieldCheck, AlertCircle, TrendingUp, Ban, MapPin, AlertTriangle, Stethoscope, BookOpen, Activity, Ambulance, UserCircle, UserPlus, Users, Package, HeartHandshake } from 'lucide-react';
+import { ScanLine, ShieldCheck, AlertCircle, TrendingUp, Ban, MapPin, AlertTriangle, Stethoscope, BookOpen, Activity, Ambulance, UserCircle, UserPlus, Users, Package, HeartHandshake, FileText } from 'lucide-react';
 import ManagerDashboard from './ManagerDashboard';
 import PatrolDashboard from './PatrolDashboard';
 import TaggingDashboard from './TaggingDashboard';
@@ -111,8 +111,8 @@ export default function Dashboard() {
              <button 
                onClick={() => navigate('/missing')} 
                style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', padding: '1.5rem 0.5rem', border: '1px solid var(--danger-hover)', borderRadius: '12px', backgroundColor: 'rgba(239, 68, 68, 0.05)', color: 'var(--danger-hover)', cursor: 'pointer', textAlign: 'center' }}>
-               <AlertTriangle size={28} />
-               <strong style={{ fontSize: '0.9rem' }}>{t('missing_report')}</strong>
+               <FileText size={28} />
+               <strong style={{ fontSize: '0.9rem' }}>Reports</strong>
              </button>
              <button 
                onClick={() => navigate('/knowledge')} 
@@ -284,6 +284,7 @@ export default function Dashboard() {
            </p>
         )}
 
+
         <div style={{ marginTop: '2rem' }}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1rem' }}>
             <div>
@@ -342,6 +343,7 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
+
       </div>
     </>
   );
