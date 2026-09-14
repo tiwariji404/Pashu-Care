@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAppStore } from '../store/appStore';
-import { ScanLine, ShieldCheck, AlertCircle, TrendingUp, Ban, MapPin, AlertTriangle, Stethoscope, BookOpen, Activity, Ambulance, UserCircle, UserPlus, Users, Package } from 'lucide-react';
+import { ScanLine, ShieldCheck, AlertCircle, TrendingUp, Ban, MapPin, AlertTriangle, Stethoscope, BookOpen, Activity, Ambulance, UserCircle, UserPlus, Users, Package, HeartHandshake } from 'lucide-react';
 import ManagerDashboard from './ManagerDashboard';
 import PatrolDashboard from './PatrolDashboard';
 import TaggingDashboard from './TaggingDashboard';
@@ -51,7 +51,7 @@ export default function Dashboard() {
     <>
       <div className="header">
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <img src="/src/assets/safe cow.png" alt="Safe Cow" style={{ width: '32px', height: '32px', objectFit: 'contain' }} />
+          <img src="/src/assets/pashu care.png" alt="Pashu Care" style={{ width: '32px', height: '32px', objectFit: 'contain' }} />
           <h1 style={{ margin: 0 }}>{t('app_title')}</h1>
         </div>
         {user?.role === 'admin' && <span className="badge" style={{ marginLeft: '0.5rem' }}>{t('admin_badge')}</span>}
@@ -107,6 +107,12 @@ export default function Dashboard() {
                style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', padding: '1.5rem 0.5rem', border: '1px solid #9333ea', borderRadius: '12px', backgroundColor: 'rgba(147, 51, 234, 0.05)', color: '#9333ea', cursor: 'pointer', textAlign: 'center' }}>
                <Activity size={28} />
                <strong style={{ fontSize: '0.9rem' }}>{t('disease_alerts')}</strong>
+             </button>
+             <button 
+               onClick={() => navigate('/adoption')} 
+               style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', padding: '1.5rem 0.5rem', border: '1px solid #f43f5e', borderRadius: '12px', backgroundColor: 'rgba(244, 63, 94, 0.05)', color: '#e11d48', cursor: 'pointer', textAlign: 'center', gridColumn: 'span 2' }}>
+               <HeartHandshake size={28} />
+               <strong style={{ fontSize: '0.9rem' }}>Adoption & Fostering</strong>
              </button>
           </div>
         )}

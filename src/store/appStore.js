@@ -1,7 +1,10 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 
-export const useAppStore = create((set, get) => ({
-  user: null,
+export const useAppStore = create(
+  persist(
+    (set, get) => ({
+      user: null,
   users: [],
   cows: [], 
   complaints: [],
@@ -12,6 +15,7 @@ export const useAppStore = create((set, get) => ({
   diseaseAlerts: [],
   ambulances: [],
   warehouseInventory: 0,
+  adoptions: [],
 
   init: async () => {
     try {
@@ -278,8 +282,55 @@ export const useAppStore = create((set, get) => ({
         ]
       };
     });
+  },
+
+  addAdoptionListing: (listingData) => {
+    set((state) => {
+      fetch('/api/adoptions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(listingData)
+      }).catch(console.error);
+
+      return {
+        adoptions: [
+          { ...listingData, id: Date.now().toString(), status: 'available', requests: [] },
+          ...state.adoptions
+        ]
+      };
+    });
+  },
+
+  requestAdoption: (adoptionId, requestData) => {
+    set((state) => {
+      let updatedAdoptions = [...state.adoptions];
+      const index = updatedAdoptions.findIndex(a => a.id === adoptionId);
+      if (index !== -1) {
+        updatedAdoptions[index] = {
+          ...updatedAdoptions[index],
+          requests: [
+            ...updatedAdoptions[index].requests,
+            { ...requestData, id: Date.now().toString(), status: 'pending' }
+          ]
+        };
+      }
+
+      fetch('/api/adoptions/request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ adoptionId, requestData })
+      }).catch(console.error);
+
+      return { adoptions: updatedAdoptions };
+    });
   }
-}));
+    }),
+    {
+      name: 'pashu-care-storage',
+      partialize: (state) => ({ user: state.user })
+    }
+  )
+);
 
 // Initialize store with fetching backend state once
 useAppStore.getState().init();
