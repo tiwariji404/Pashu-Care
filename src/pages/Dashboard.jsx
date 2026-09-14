@@ -13,6 +13,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
   
   const seizedCows = cows.filter(c => c.seized);
+  const myAnimals = cows.filter(c => c.phone === user?.phone);
 
   const [assignPhone, setAssignPhone] = React.useState('');
   const [assignName, setAssignName] = React.useState('');
@@ -235,6 +236,34 @@ export default function Dashboard() {
               </div>
               <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '0.75rem' }}>Assign Role</button>
             </form>
+          </div>
+        )}
+
+        {user?.role !== 'admin' && (
+          <div style={{ marginBottom: '2rem' }}>
+            <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
+               <img src="/src/assets/safe cow.png" alt="Cow" style={{ width: '24px', height: '24px', objectFit: 'contain' }} />
+               My Animals
+            </h3>
+            {myAnimals.length > 0 ? (
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                {myAnimals.map((animal, idx) => (
+                  <div 
+                    key={idx} 
+                    onClick={() => navigate(`/cow/${animal.qrId}`)}
+                    style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', padding: '1.5rem 0.5rem', border: '1px solid var(--primary-color)', borderRadius: '12px', backgroundColor: 'rgba(16, 185, 129, 0.05)', color: 'var(--primary-hover)', cursor: 'pointer', textAlign: 'center' }}
+                  >
+                    <img src="/src/assets/safe cow.png" alt="Cow" style={{ width: '32px', height: '32px', objectFit: 'contain' }} />
+                    <strong style={{ fontSize: '0.9rem' }}>{animal.breed || animal.species}</strong>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>ID: {animal.qrId}</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="card" style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>
+                No animals registered under this number.
+              </div>
+            )}
           </div>
         )}
 
