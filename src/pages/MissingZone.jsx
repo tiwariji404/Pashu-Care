@@ -52,7 +52,7 @@ export default function MissingZone() {
       <div className="header" style={{ borderBottom: 'none' }}>
         <h1>
           <ArrowLeft size={24} onClick={() => navigate('/')} style={{cursor:'pointer'}} /> 
-          <AlertTriangle color="#ef4444" /> Missing Report
+          <AlertTriangle color="#ef4444" /> Missing & Spotted
         </h1>
       </div>
       
@@ -135,9 +135,11 @@ export default function MissingZone() {
 const ReportCard = ({ report }) => (
   <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
     <div style={{ position: 'relative' }}>
-      <img src={report.photo} alt="Missing Cow" style={{ width: '100%', height: '200px', objectFit: 'cover', display: 'block' }} />
+      <img src={report.photo} alt="Missing/Found Cow" style={{ width: '100%', height: '200px', objectFit: 'cover', display: 'block' }} />
       <div style={{ position: 'absolute', top: '10px', left: '10px' }}>
-         <span className="badge" style={{ backgroundColor: 'var(--danger-color)', color: 'white' }}>MISSING</span>
+         <span className="badge" style={{ backgroundColor: report.status === 'spotted' ? 'var(--primary-color)' : 'var(--danger-color)', color: 'white' }}>
+           {report.status === 'spotted' ? 'SPOTTED' : 'MISSING'}
+         </span>
       </div>
     </div>
     <div style={{ padding: '1rem' }}>

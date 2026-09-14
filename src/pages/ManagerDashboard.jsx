@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '../store/appStore';
-import { Home, Users, CheckCircle, TrendingUp, Download, Package } from 'lucide-react';
+import { Home, Users, CheckCircle, TrendingUp, Download, Package, HeartHandshake } from 'lucide-react';
 import WorkerInventory from '../components/WorkerInventory';
 
 export default function ManagerDashboard() {
@@ -57,6 +57,9 @@ export default function ManagerDashboard() {
           </button>
           <button className="btn btn-outline" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem' }} onClick={() => navigate('/ambulance')}>
             <span style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}><Package size={20} /> Feed Inventory</span>
+          </button>
+          <button className="btn btn-primary" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', marginTop: '0.5rem' }} onClick={() => navigate('/adoption')}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}><HeartHandshake size={20} /> Adoption Portal</span>
           </button>
         </div>
 

@@ -9,10 +9,10 @@ export default function CowDetails() {
   const getCowByQrId = useAppStore(state => state.getCowByQrId);
   const user = useAppStore(state => state.user);
   
-  const reportComplaint = useAppStore(state => state.reportComplaint);
   const getComplaintsByQrId = useAppStore(state => state.getComplaintsByQrId);
   const payChallan = useAppStore(state => state.payChallan);
   const disputeChallan = useAppStore(state => state.disputeChallan);
+  const addMissingReport = useAppStore(state => state.addMissingReport);
 
   const cow = getCowByQrId(qrId);
   const complaints = getComplaintsByQrId(qrId);
@@ -64,6 +64,18 @@ export default function CowDetails() {
           };
 
           reportComplaint(complaintData);
+          
+          if (user?.role !== 'patrol_squad' && user?.role !== 'admin') {
+            addMissingReport({
+              ownerName: cow.ownerName,
+              location: user?.location || 'Garhwa',
+              reporterPhone: user?.phone,
+              photo: photoPreview || 'https://images.unsplash.com/photo-1546445317-29f4545e9d53?w=500&q=80',
+              status: 'spotted',
+              description: `Spotted Animal (Tag: ${qrId}). Note: ${reason}`
+            });
+          }
+          
           setComplaintStatus('reported');
           setIsFilingComplaint(false);
           setReason('');
@@ -133,7 +145,7 @@ export default function CowDetails() {
 
         {!cow.seized && (
           <div className="card">
-            <h2 className="card-title">Patrol Action</h2>
+            <h2 className="card-title">{user?.role === 'patrol_squad' ? 'Patrol Action' : 'Citizen Action'}</h2>
             {complaintStatus === 'reported' ? (
               <div style={{ padding: '1rem', backgroundColor: 'rgba(16, 185, 129, 0.1)', color: 'var(--primary-hover)', borderRadius: 'var(--border-radius)', textAlign: 'center' }}>
                 <CheckCircle size={32} style={{ margin: '0 auto 0.5rem auto' }} />
@@ -143,7 +155,9 @@ export default function CowDetails() {
             ) : isFilingComplaint ? (
               <form onSubmit={submitComplaint} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <h3 style={{ margin: 0, fontSize: '1rem' }}>File Complaint Form</h3>
+                  <h3 style={{ margin: 0, fontSize: '1rem' }}>
+                    {user?.role === 'patrol_squad' ? 'File Complaint Form' : 'Found / Spotted Animal'}
+                  </h3>
                   <X size={20} color="var(--text-secondary)" onClick={() => setIsFilingComplaint(false)} style={{ cursor: 'pointer' }} />
                 </div>
                 
@@ -194,7 +208,7 @@ export default function CowDetails() {
                   style={{ width: '100%', padding: '1rem', fontSize: '1rem', display: 'flex', justifyContent: 'center', gap: '0.5rem' }}
                 >
                   <AlertCircle size={20} />
-                  {complaintStatus === 'locating' ? 'Submitting...' : 'Submit to Pashu Vibhag'}
+                  {complaintStatus === 'locating' ? 'Submitting...' : user?.role === 'patrol_squad' ? 'Submit to Pashu Vibhag' : 'Publish to Area Feed'}
                 </button>
               </form>
             ) : (
@@ -204,7 +218,7 @@ export default function CowDetails() {
                 style={{ width: '100%', padding: '1rem', fontSize: '1rem', display: 'flex', justifyContent: 'center', gap: '0.5rem' }}
               >
                 <AlertCircle size={20} />
-                Report Stray / Violation
+                {user?.role === 'patrol_squad' ? 'Report Stray / Violation' : 'Report Found / Spotted Animal'}
               </button>
             )}
           </div>

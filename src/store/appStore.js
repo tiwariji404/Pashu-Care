@@ -15,6 +15,7 @@ export const useAppStore = create(
   diseaseAlerts: [],
   ambulances: [],
   warehouseInventory: 0,
+  adoptions: [],
 
   init: async () => {
     try {
@@ -280,6 +281,47 @@ export const useAppStore = create(
           ...state.diseaseAlerts
         ]
       };
+    });
+  },
+
+  addAdoptionListing: (listingData) => {
+    set((state) => {
+      fetch('/api/adoptions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(listingData)
+      }).catch(console.error);
+
+      return {
+        adoptions: [
+          { ...listingData, id: Date.now().toString(), status: 'available', requests: [] },
+          ...state.adoptions
+        ]
+      };
+    });
+  },
+
+  requestAdoption: (adoptionId, requestData) => {
+    set((state) => {
+      let updatedAdoptions = [...state.adoptions];
+      const index = updatedAdoptions.findIndex(a => a.id === adoptionId);
+      if (index !== -1) {
+        updatedAdoptions[index] = {
+          ...updatedAdoptions[index],
+          requests: [
+            ...updatedAdoptions[index].requests,
+            { ...requestData, id: Date.now().toString(), status: 'pending' }
+          ]
+        };
+      }
+
+      fetch('/api/adoptions/request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ adoptionId, requestData })
+      }).catch(console.error);
+
+      return { adoptions: updatedAdoptions };
     });
   }
     }),

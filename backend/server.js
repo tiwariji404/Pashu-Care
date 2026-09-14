@@ -50,7 +50,10 @@ let state = {
     { id: 4, name: "Garhwa Animal Rescue Van", location: "Garhwa", phone: "9876000004", vehicle: "Hydraulic Vet Truck" },
     { id: 5, name: "Mukesh Transport", location: "Hazaribagh", phone: "9876000005", vehicle: "Tractor Trolley" }
   ],
-  warehouseInventory: 50000
+  warehouseInventory: 50000,
+  adoptions: [
+    { id: 'ad1', type: 'Cow', breed: 'Sahiwal', age: 3, health: 'Healthy', photo: 'https://images.unsplash.com/photo-1546445317-29f4545e9d53?w=500&q=80', description: 'Very calm. Rescued from highway.', status: 'available', requests: [] }
+  ]
 };
 
 // API: GET FULL STATE (For simple initial load)
@@ -65,7 +68,8 @@ app.get('/api/state', (req, res) => {
     vets: state.vets,
     diseaseAlerts: state.diseaseAlerts,
     ambulances: state.ambulances,
-    warehouseInventory: state.warehouseInventory
+    warehouseInventory: state.warehouseInventory,
+    adoptions: state.adoptions
   });
 });
 
@@ -248,6 +252,25 @@ app.post('/api/alerts', (req, res) => {
   const newAlert = { ...alertData, id: Date.now().toString(), date: new Date().toISOString().split('T')[0] };
   state.diseaseAlerts.unshift(newAlert);
   res.json({ success: true, diseaseAlerts: state.diseaseAlerts });
+});
+
+// API: ADOPTIONS
+app.post('/api/adoptions', (req, res) => {
+  const listingData = req.body;
+  const newListing = { ...listingData, id: Date.now().toString(), status: 'available', requests: [] };
+  state.adoptions.unshift(newListing);
+  res.json({ success: true, adoptions: state.adoptions });
+});
+
+app.post('/api/adoptions/request', (req, res) => {
+  const { adoptionId, requestData } = req.body;
+  const index = state.adoptions.findIndex(a => a.id === adoptionId);
+  if (index !== -1) {
+    state.adoptions[index].requests.push({ ...requestData, id: Date.now().toString(), status: 'pending' });
+    res.json({ success: true, adoptions: state.adoptions });
+  } else {
+    res.status(404).json({ error: 'Listing not found' });
+  }
 });
 
 const PORT = 3001;
