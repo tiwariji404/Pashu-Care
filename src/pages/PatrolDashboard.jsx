@@ -8,7 +8,8 @@ export default function PatrolDashboard() {
   const { user, complaints } = useAppStore();
   const navigate = useNavigate();
 
-  const myViolationsLogged = complaints.length; // Simplified for demo
+  const myReports = complaints.filter(c => c.reporterPhone === user?.phone || true); // Assuming all for demo
+  const myViolationsLogged = myReports.length;
   const pendingSeizures = complaints.filter(c => c.status === 'pending_seizure').length;
 
   return (
@@ -62,6 +63,27 @@ export default function PatrolDashboard() {
             <span style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}><AlertTriangle size={20} /> Call Transport/Rescue</span>
           </button>
         </div>
+
+        <h3 style={{ marginTop: '2rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <AlertTriangle size={20} /> My Recent Reports
+        </h3>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          {myReports.length === 0 ? (
+            <p className="card" style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>No reports filed yet.</p>
+          ) : (
+            myReports.map((c, i) => (
+              <div key={i} className="card" style={{ borderLeft: '4px solid var(--primary-color)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
+                  <strong>Cow Tag: {c.cowQrId}</strong>
+                  <span className="badge" style={{ backgroundColor: 'rgba(16, 185, 129, 0.1)', color: 'var(--primary-hover)' }}>{c.status.toUpperCase()}</span>
+                </div>
+                <p style={{ margin: '0.5rem 0', fontSize: '0.875rem' }}>Note: {c.reason}</p>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{new Date(c.timestamp).toLocaleString()}</span>
+              </div>
+            ))
+          )}
+        </div>
+
       </div>
     </>
   );

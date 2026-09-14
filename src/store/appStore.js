@@ -16,6 +16,7 @@ export const useAppStore = create(
   ambulances: [],
   warehouseInventory: 0,
   adoptions: [],
+  notifications: [],
 
   init: async () => {
     try {
@@ -347,6 +348,23 @@ export const useAppStore = create(
       }).catch(console.error);
 
       return { adoptions: updatedAdoptions };
+    });
+  },
+
+  addNotification: (notifData) => {
+    set((state) => {
+      fetch('/api/notifications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(notifData)
+      }).catch(console.error);
+
+      return {
+        notifications: [
+          { ...notifData, id: Date.now().toString(), timestamp: new Date().toISOString(), read: false },
+          ...state.notifications
+        ]
+      };
     });
   }
     }),
