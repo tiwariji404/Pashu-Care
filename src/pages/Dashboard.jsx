@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAppStore } from '../store/appStore';
-import { ScanLine, ShieldCheck, AlertCircle, TrendingUp, Ban, MapPin, AlertTriangle, Stethoscope, BookOpen, Activity, Ambulance, UserCircle, UserPlus, Users, Package, HeartHandshake } from 'lucide-react';
+import { ScanLine, ShieldCheck, AlertCircle, TrendingUp, Ban, MapPin, AlertTriangle, Stethoscope, BookOpen, Activity, Ambulance, UserCircle, UserPlus, Users, Package, HeartHandshake, FileText } from 'lucide-react';
 import ManagerDashboard from './ManagerDashboard';
 import PatrolDashboard from './PatrolDashboard';
 import TaggingDashboard from './TaggingDashboard';
@@ -111,8 +111,8 @@ export default function Dashboard() {
              <button 
                onClick={() => navigate('/missing')} 
                style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', padding: '1.5rem 0.5rem', border: '1px solid var(--danger-hover)', borderRadius: '12px', backgroundColor: 'rgba(239, 68, 68, 0.05)', color: 'var(--danger-hover)', cursor: 'pointer', textAlign: 'center' }}>
-               <AlertTriangle size={28} />
-               <strong style={{ fontSize: '0.9rem' }}>{t('missing_report')}</strong>
+               <FileText size={28} />
+               <strong style={{ fontSize: '0.9rem' }}>Reports</strong>
              </button>
              <button 
                onClick={() => navigate('/knowledge')} 
@@ -284,64 +284,7 @@ export default function Dashboard() {
            </p>
         )}
 
-        <div style={{ marginTop: '2rem' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1rem' }}>
-            <div>
-              <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
-                <AlertCircle size={20} color="var(--text-primary)" /> {user?.role === 'admin' ? 'Global Ledger' : 'Area Violations'}
-              </h3>
-              
-              {complaints.length === 0 ? (
-                <p className="card" style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>
-                  No recent patrol violations or reports yet.
-                </p>
-              ) : (
-                complaints.map((c, i) => (
-                  <div key={i} className="card" style={{ borderLeft: `4px solid ${c.status === 'pending_seizure' ? 'var(--danger-color)' : (c.type === 'alert' ? '#eab308' : 'var(--primary-color)')}`, marginBottom: '1rem' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                      <strong>{c.type === 'alert' ? 'Community Report' : `Strike ${c.strikeLevel} Violation`}</strong>
-                      <span className="badge" style={{ backgroundColor: c.status === 'paid' ? 'var(--bg-color)' : 'rgba(239, 68, 68, 0.1)', color: c.status === 'paid' ? 'var(--text-secondary)' : 'var(--danger-color)' }}>
-                        {c.status.toUpperCase()}
-                      </span>
-                    </div>
-                    <p style={{ margin: '0.25rem 0', fontSize: '0.875rem' }}>Cow ID: {c.cowQrId}</p>
-                    {c.reason && <p style={{ margin: '0', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Issue: {c.reason}</p>}
-                    {c.fine > 0 && <p style={{ margin: '0', fontSize: '0.875rem', fontWeight: 600 }}>Fine: ₹{c.fine}</p>}
-                    <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>
-                      Loc: {c.location.lat.toFixed(4)}, {c.location.lng.toFixed(4)}
-                      <br />Time: {new Date(c.timestamp).toLocaleString()}
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
 
-            <div>
-              <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
-                <MapPin size={20} color="#eab308" /> Spotted / Missing Animals
-              </h3>
-              
-              {missingReports.length === 0 ? (
-                <p className="card" style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>
-                  No missing or spotted animals reported.
-                </p>
-              ) : (
-                missingReports.map((r, i) => (
-                  <div key={i} className="card" style={{ borderLeft: `4px solid ${r.status === 'missing' ? 'var(--danger-color)' : '#eab308'}`, marginBottom: '1rem' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                      <strong>{r.status === 'missing' ? 'Reported Missing' : 'Animal Spotted'}</strong>
-                    </div>
-                    <p style={{ margin: '0.25rem 0', fontSize: '0.875rem' }}>Location: {r.location}</p>
-                    <p style={{ margin: '0', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Info: {r.description}</p>
-                    <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-                      Contact: {r.reporterPhone}
-                    </p>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-        </div>
       </div>
     </>
   );
