@@ -8,9 +8,9 @@ app.use(express.json());
 // IN-MEMORY DATA STORE
 let state = {
   users: [
-    { phone: '1111111111', role: 'gaushala_manager', name: 'Raj Tiwari', location: 'Garhwa', inventory: { total: 100, remaining: 50, label: 'गौशाला क्षमता' } },
-    { phone: '2222222222', role: 'patrol_squad', name: 'Bishal', location: 'HQ', inventory: { total: 50, remaining: 20, label: 'गश्ती कार्य' } },
-    { phone: '3333333333', role: 'tagging_agent', name: 'XYZ', location: 'Field', inventory: { total: 200, remaining: 85, label: 'QR टैग' } }
+    { phone: '1111111111', role: 'gaushala_manager', name: 'Raj Tiwari', location: 'Garhwa', activeHours: 8, inventory: { total: 100, remaining: 50, label: 'गौशाला क्षमता' } },
+    { phone: '2222222222', role: 'patrol_squad', name: 'Bishal', location: 'HQ', activeHours: 12, inventory: { total: 50, remaining: 20, label: 'गश्ती कार्य' } },
+    { phone: '3333333333', role: 'tagging_agent', name: 'XYZ', location: 'Field', activeHours: 6, inventory: { total: 200, remaining: 85, label: 'QR टैग' } }
   ],
   cows: [],
   complaints: [],
@@ -132,10 +132,11 @@ app.post('/api/users/assign-role', (req, res) => {
   if(role === 'patrol_squad') label = 'गश्ती कार्य';
 
   const existingUserIndex = state.users.findIndex(u => u.phone === phone);
+  const activeHours = Math.floor(Math.random() * 9) + 4; // Mock 4-12 hours
   if (existingUserIndex >= 0) {
-    state.users[existingUserIndex] = { ...state.users[existingUserIndex], role, name, inventory: { total: 100, remaining: 100, label } };
+    state.users[existingUserIndex] = { ...state.users[existingUserIndex], role, name, activeHours: state.users[existingUserIndex].activeHours || activeHours, inventory: { total: 100, remaining: 100, label } };
   } else {
-    state.users.push({ phone, role, name, location: 'Assigned by Admin', inventory: { total: 100, remaining: 100, label } });
+    state.users.push({ phone, role, name, location: 'Assigned by Admin', activeHours, inventory: { total: 100, remaining: 100, label } });
   }
   res.json({ success: true, users: state.users });
 });

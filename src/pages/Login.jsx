@@ -58,41 +58,41 @@ export default function Login() {
   };
 
   return (
-    <div className="content" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', height: '100%' }}>
-      <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-        <img src="/src/assets/pashu care.png" alt="Pashu Care Logo" style={{ width: '120px', height: '120px', objectFit: 'contain', margin: '0 auto' }} />
-        <h1 style={{ marginTop: '0.5rem', color: 'var(--primary-color)' }}>{t('app_title')}</h1>
-        <p>Digital Patrol & Registration System</p>
-      </div>
-
-      <div className="card">
-        <h2 className="card-title">
-          {step === 'phone' ? 'Login to Portal' : step === 'register_details' ? 'Create Account' : 'Enter OTP'}
-        </h2>
+      <div className="content" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', height: '100%' }}>
+        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+          <img src="/src/assets/pashu care.png" alt="Pashu Care Logo" style={{ width: '120px', height: '120px', objectFit: 'contain', margin: '0 auto' }} />
+          <h1 style={{ marginTop: '0.5rem', color: 'var(--primary-color)' }}>{t('app_title')}</h1>
+          <p>{t('digital_patrol_sys')}</p>
+        </div>
+  
+        <div className="card">
+          <h2 className="card-title">
+            {step === 'phone' ? t('login_portal') : step === 'register_details' ? t('create_account') : t('enter_otp')}
+          </h2>
         
         {error && <p style={{ color: 'var(--danger-color)', fontSize: '0.875rem' }}>{error}</p>}
 
         {step === 'phone' && (
           <form onSubmit={handleSendOtp}>
             <div className="form-group">
-              <label>Mobile Number</label>
-              <input 
-                type="tel" 
-                className="form-control" 
-                placeholder="10-digit number"
-                value={phone}
-                onChange={e => setPhone(e.target.value.replace(/\D/g, '').substring(0,10))}
-              />
-            </div>
-            <div style={{ fontSize: '0.75rem', color: '#666', marginTop: '-10px', marginBottom: '5px' }}>
-              <strong>Demo Logins (OTP: 1234):</strong><br/>
-              Admin: 9999999999<br/>
-              Manager: 1111111111<br/>
-              Patrol: 2222222222<br/>
-              Agent: 3333333333
-            </div>
-            <button type="submit" className="btn btn-primary" style={{ marginTop: '1rem' }}>
-              Continue <ArrowRight size={18} />
+                <label>{t('mobile_number')}</label>
+                <input 
+                  type="tel" 
+                  className="form-control" 
+                  placeholder="10-digit number"
+                  value={phone}
+                  onChange={e => setPhone(e.target.value.replace(/\D/g, '').substring(0,10))}
+                />
+              </div>
+              <div style={{ fontSize: '0.75rem', color: '#666', marginTop: '-10px', marginBottom: '5px' }}>
+                <strong>{t('demo_logins')} (OTP: 1234):</strong><br/>
+                Admin: 9999999999<br/>
+                Manager: 1111111111<br/>
+                Patrol: 2222222222<br/>
+                Agent: 3333333333
+              </div>
+              <button type="submit" className="btn btn-primary" style={{ marginTop: '1rem' }}>
+                {t('continue')} <ArrowRight size={18} />
             </button>
           </form>
         )}
@@ -100,28 +100,28 @@ export default function Login() {
         {step === 'register_details' && (
           <form onSubmit={handleRegisterDetails}>
             <div className="form-group">
-              <label>Full Name</label>
+              <label>{t('full_name')}</label>
               <input 
                 type="text" 
                 className="form-control" 
-                placeholder="Enter your name"
+                placeholder={t('enter_name')}
                 value={name}
                 onChange={e => setName(e.target.value)}
               />
             </div>
             <div className="form-group">
-              <label>Location</label>
+              <label>{t('location_label')}</label>
               <input 
                 type="text" 
                 className="form-control" 
-                placeholder="e.g., Garhwa"
+                placeholder={t('eg_garhwa')}
                 value={location}
                 onChange={e => setLocation(e.target.value)}
               />
             </div>
-            <p style={{ fontSize: '0.8rem', color: '#666', marginTop: '-10px' }}>This helps find nearby Gaushalas.</p>
+            <p style={{ fontSize: '0.8rem', color: '#666', marginTop: '-10px' }}>{t('helps_find_nearby')}</p>
             <button type="submit" className="btn btn-primary" style={{ marginTop: '1rem' }}>
-              Send OTP <ArrowRight size={18} />
+              {t('send_otp')} <ArrowRight size={18} />
             </button>
             <button 
               type="button" 
@@ -129,7 +129,7 @@ export default function Login() {
               style={{ marginTop: '0.75rem' }}
               onClick={() => setStep('phone')}
             >
-              Back
+              {t('back')}
             </button>
           </form>
         )}
@@ -137,7 +137,7 @@ export default function Login() {
         {(step === 'otp' || step === 'otp_register') && (
           <form onSubmit={handleVerifyOtp}>
             <div className="form-group">
-              <label>OTP Sent to {phone}</label>
+              <label>{t('otp_sent_to')}{phone}</label>
               <input 
                 type="number" 
                 className="form-control" 
@@ -148,7 +148,7 @@ export default function Login() {
               />
             </div>
             <button type="submit" className="btn btn-primary" style={{ marginTop: '1rem' }}>
-              Verify & Login
+              {t('verify_login')}
             </button>
             <button 
               type="button" 
@@ -156,7 +156,7 @@ export default function Login() {
               style={{ marginTop: '0.75rem' }}
               onClick={() => setStep('phone')}
             >
-              Change Number
+              {t('change_number')}
             </button>
           </form>
         )}

@@ -1,7 +1,7 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAppStore } from '../store/appStore';
-import { ArrowLeft, User, Phone, MapPin, CheckCircle, AlertTriangle, FileText } from 'lucide-react';
+import { ArrowLeft, User, Phone, MapPin, CheckCircle, AlertTriangle, FileText, Clock } from 'lucide-react';
 
 export default function WorkerProfile() {
   const { phone } = useParams();
@@ -58,6 +58,7 @@ export default function WorkerProfile() {
            <div style={{ marginTop: '1rem', display: 'flex', justifyContent: 'center', gap: '1rem', fontSize: '0.85rem' }}>
              <span style={{ display: 'flex', gap: '0.25rem', alignItems: 'center' }}><Phone size={14} /> {worker.phone}</span>
              <span style={{ display: 'flex', gap: '0.25rem', alignItems: 'center' }}><MapPin size={14} /> {worker.location || 'Field'}</span>
+             <span style={{ display: 'flex', gap: '0.25rem', alignItems: 'center' }}><Clock size={14} /> {worker.activeHours || 0} / 24 hrs active</span>
            </div>
         </div>
 

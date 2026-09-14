@@ -85,10 +85,11 @@ export const useAppStore = create(
       if(role === 'tagging_agent') label = 'QR टैग';
       if(role === 'patrol_squad') label = 'गश्ती कार्य';
 
+      const activeHours = Math.floor(Math.random() * 9) + 4; // Mock 4-12 hours
       if (existingUserIndex >= 0) {
-        updatedUsers[existingUserIndex] = { ...updatedUsers[existingUserIndex], role, name, inventory: { total: 100, remaining: 100, label } };
+        updatedUsers[existingUserIndex] = { ...updatedUsers[existingUserIndex], role, name, activeHours: updatedUsers[existingUserIndex].activeHours || activeHours, inventory: { total: 100, remaining: 100, label } };
       } else {
-        updatedUsers.push({ phone, role, name, location: 'Assigned by Admin', inventory: { total: 100, remaining: 100, label } });
+        updatedUsers.push({ phone, role, name, location: 'Assigned by Admin', activeHours, inventory: { total: 100, remaining: 100, label } });
       }
 
       // Fire and forget API call

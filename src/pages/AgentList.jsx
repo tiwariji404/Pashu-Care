@@ -1,7 +1,7 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAppStore } from '../store/appStore';
-import { ArrowLeft, Users } from 'lucide-react';
+import { ArrowLeft, Users, Clock } from 'lucide-react';
 
 export default function AgentList() {
   const { role } = useParams();
@@ -49,8 +49,9 @@ export default function AgentList() {
                   <strong style={{ fontSize: '1.1rem' }}>{worker.name}</strong>
                   <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>{worker.phone}</span>
                 </div>
-                <div style={{ marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-                  {inv.label}: {used} / {inv.total} (शेष: {inv.remaining})
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+                  <span>{inv.label}: {used} / {inv.total} (शेष: {inv.remaining})</span>
+                  <span><Clock size={14} style={{display: 'inline', verticalAlign: 'middle', marginRight: '4px'}}/>{worker.activeHours || 0} / 24 hrs active</span>
                 </div>
                 <div style={{ width: '100%', height: '8px', backgroundColor: 'rgba(0,0,0,0.1)', borderRadius: '4px', overflow: 'hidden' }}>
                   <div style={{ width: `${progressPercent}%`, height: '100%', backgroundColor: details.color }}></div>

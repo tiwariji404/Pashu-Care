@@ -75,13 +75,13 @@ export default function Dashboard() {
         {myAnimalComplaints.length > 0 && (
           <div className="card" style={{ backgroundColor: 'var(--danger-color)', color: 'white', borderColor: 'var(--danger-hover)', marginBottom: '1.5rem' }}>
             <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: '0 0 0.5rem 0', color: 'white' }}>
-              <AlertTriangle size={24} /> URGENT ALERT: Your Animal Reported!
+              <AlertTriangle size={24} /> {t('alert_urgent')}
             </h3>
             {myAnimalComplaints.map((c, i) => (
               <div key={i} style={{ marginBottom: i !== myAnimalComplaints.length - 1 ? '1rem' : 0, paddingBottom: i !== myAnimalComplaints.length - 1 ? '1rem' : 0, borderBottom: i !== myAnimalComplaints.length - 1 ? '1px solid rgba(255,255,255,0.2)' : 'none' }}>
-                <strong style={{color: 'white'}}>ID: {c.cowQrId}</strong> has been reported roaming or causing issues.
-                <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.85rem', color: 'rgba(255,255,255,0.9)' }}>Reason: {c.reason || 'Wandering / Nuisance'}</p>
-                <button className="btn btn-outline" style={{ marginTop: '0.75rem', borderColor: 'rgba(255,255,255,0.5)', color: 'white', padding: '0.35rem 0.75rem', fontSize: '0.8rem' }} onClick={() => navigate(`/cow/${c.cowQrId}`)}>View Report Details</button>
+                <strong style={{color: 'white'}}>ID: {c.cowQrId}</strong> {t('alert_roaming')}
+                <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.85rem', color: 'rgba(255,255,255,0.9)' }}>{t('alert_reason')}{c.reason || 'Wandering / Nuisance'}</p>
+                <button className="btn btn-outline" style={{ marginTop: '0.75rem', borderColor: 'rgba(255,255,255,0.5)', color: 'white', padding: '0.35rem 0.75rem', fontSize: '0.8rem' }} onClick={() => navigate(`/cow/${c.cowQrId}`)}>{t('alert_view_details')}</button>
               </div>
             ))}
           </div>
@@ -130,13 +130,13 @@ export default function Dashboard() {
                onClick={() => navigate('/adoption')} 
                style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', padding: '1.5rem 0.5rem', border: '1px solid #f43f5e', borderRadius: '12px', backgroundColor: 'rgba(244, 63, 94, 0.05)', color: '#e11d48', cursor: 'pointer', textAlign: 'center' }}>
                <HeartHandshake size={28} />
-               <strong style={{ fontSize: '0.9rem' }}>Adoption & Fostering</strong>
+               <strong style={{ fontSize: '0.9rem' }}>{t('adoption_fostering')}</strong>
              </button>
              <button 
                onClick={() => navigate('/my-animals')} 
                style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', padding: '1.5rem 0.5rem', border: '1px solid #10b981', borderRadius: '12px', backgroundColor: 'rgba(16, 185, 129, 0.05)', color: '#059669', cursor: 'pointer', textAlign: 'center' }}>
                <Package size={28} />
-               <strong style={{ fontSize: '0.9rem' }}>My Animals</strong>
+               <strong style={{ fontSize: '0.9rem' }}>{t('my_animals')}</strong>
              </button>
           </div>
         )}
@@ -162,20 +162,20 @@ export default function Dashboard() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
              <div className="card" onClick={() => navigate('/admin/agents/tagging_agent')} style={{ cursor: 'pointer', padding: '1.5rem 1rem', textAlign: 'center', borderColor: '#3b82f6', backgroundColor: '#eff6ff', transition: 'transform 0.2s' }}>
                <h3 style={{ fontSize: '2rem', margin: '0 0 0.25rem 0', color: '#2563eb' }}>{users.filter(u => u.role === 'tagging_agent').length}</h3>
-               <p style={{ margin: 0, fontSize: '1rem', fontWeight: 600, color: '#1e3a8a' }}>Tagging Agents</p>
-               <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.8rem', color: '#3b82f6' }}>View All Agents &rarr;</p>
+               <p style={{ margin: 0, fontSize: '1rem', fontWeight: 600, color: '#1e3a8a' }}>{t('tagging_agents')}</p>
+               <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.8rem', color: '#3b82f6' }}>{t('view_all_agents')} &rarr;</p>
              </div>
              
              <div className="card" onClick={() => navigate('/admin/agents/patrol_squad')} style={{ cursor: 'pointer', padding: '1.5rem 1rem', textAlign: 'center', borderColor: 'var(--danger-hover)', backgroundColor: '#fef2f2', transition: 'transform 0.2s' }}>
                <h3 style={{ fontSize: '2rem', margin: '0 0 0.25rem 0', color: 'var(--danger-hover)' }}>{users.filter(u => u.role === 'patrol_squad').length}</h3>
-               <p style={{ margin: 0, fontSize: '1rem', fontWeight: 600, color: '#7f1d1d' }}>Patrolling Squads</p>
-               <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.8rem', color: 'var(--danger-hover)' }}>View All Squads &rarr;</p>
+               <p style={{ margin: 0, fontSize: '1rem', fontWeight: 600, color: '#7f1d1d' }}>{t('patrolling_squads')}</p>
+               <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.8rem', color: 'var(--danger-hover)' }}>{t('view_all_squads')} &rarr;</p>
              </div>
              
              <div className="card" onClick={() => navigate('/admin/agents/gaushala_manager')} style={{ cursor: 'pointer', padding: '1.5rem 1rem', textAlign: 'center', borderColor: 'var(--primary-color)', backgroundColor: '#ecfdf5', transition: 'transform 0.2s' }}>
                <h3 style={{ fontSize: '2rem', margin: '0 0 0.25rem 0', color: 'var(--primary-hover)' }}>{users.filter(u => u.role === 'gaushala_manager').length}</h3>
-               <p style={{ margin: 0, fontSize: '1rem', fontWeight: 600, color: '#064e3b' }}>Gaushala Managers</p>
-               <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.8rem', color: 'var(--primary-color)' }}>View All Managers &rarr;</p>
+               <p style={{ margin: 0, fontSize: '1rem', fontWeight: 600, color: '#064e3b' }}>{t('gaushala_managers')}</p>
+               <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.8rem', color: 'var(--primary-color)' }}>{t('view_all_managers')} &rarr;</p>
              </div>
           </div>
         )}
@@ -184,15 +184,15 @@ export default function Dashboard() {
           <div className="card" style={{ marginBottom: '2rem', borderColor: '#cbd5e1', backgroundColor: '#f8fafc' }}>
             <h3 style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', marginBottom: '1rem' }}>
               <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#475569' }}>
-                <Package size={20} /> RFID Supply & Dispatch
+                <Package size={20} /> {t('rfid_supply')}
               </span>
               <span className="badge" style={{ backgroundColor: '#64748b', color: 'white', fontSize: '0.8rem' }}>
-                Govt Stock: {warehouseInventory?.toLocaleString() || 50000} Tags
+                {t('govt_stock')} {warehouseInventory?.toLocaleString() || 50000}
               </span>
             </h3>
             <form onSubmit={handleAllocate}>
               <div className="form-group" style={{ marginBottom: '0.75rem' }}>
-                <label style={{ fontSize: '0.85rem', color: '#334155' }}>Select Tagging Agent</label>
+                <label style={{ fontSize: '0.85rem', color: '#334155' }}>{t('select_tagging_agent')}</label>
                 <select 
                   className="form-control" 
                   value={rfidAgent}
@@ -200,14 +200,14 @@ export default function Dashboard() {
                   style={{ backgroundColor: 'white', borderColor: '#cbd5e1' }}
                   required
                 >
-                  <option value="">-- Choose Active Field Agent --</option>
+                  <option value="">{t('choose_active_agent')}</option>
                   {users.filter(u => u.role === 'tagging_agent').map(a => (
                     <option key={a.phone} value={a.phone}>{a.name} ({a.phone})</option>
                   ))}
                 </select>
               </div>
               <div className="form-group" style={{ marginBottom: '1rem' }}>
-                <label style={{ fontSize: '0.85rem', color: '#334155' }}>Tag Quantity</label>
+                <label style={{ fontSize: '0.85rem', color: '#334155' }}>{t('tag_quantity')}</label>
                 <input 
                   type="number" 
                   className="form-control" 
@@ -219,7 +219,7 @@ export default function Dashboard() {
                   min="1"
                 />
               </div>
-              <button type="submit" className="btn" style={{ width: '100%', padding: '0.75rem', backgroundColor: '#475569', color: 'white', border: 'none' }}>Dispatch Tags</button>
+              <button type="submit" className="btn" style={{ width: '100%', padding: '0.75rem', backgroundColor: '#475569', color: 'white', border: 'none' }}>{t('dispatch_tags')}</button>
             </form>
           </div>
         )}
@@ -227,44 +227,44 @@ export default function Dashboard() {
         {user?.role === 'admin' && (
           <div className="card" style={{ marginBottom: '2rem', borderColor: 'var(--primary-color)' }}>
             <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
-              <UserPlus size={20} color="var(--primary-color)" /> Assign Specific Roles
+              <UserPlus size={20} color="var(--primary-color)" /> {t('assign_roles')}
             </h3>
             <form onSubmit={handleAssignRole}>
               <div className="form-group" style={{ marginBottom: '0.75rem' }}>
-                <label style={{ fontSize: '0.85rem' }}>Phone Number</label>
+                <label style={{ fontSize: '0.85rem' }}>{t('phone_number')}</label>
                 <input 
                   type="tel" 
                   className="form-control" 
-                  placeholder="10-digit number"
+                  placeholder={t('phone_number')}
                   value={assignPhone}
                   onChange={e => setAssignPhone(e.target.value.replace(/\D/g, '').substring(0,10))}
                 />
               </div>
               <div className="form-group" style={{ marginBottom: '0.75rem' }}>
-                <label style={{ fontSize: '0.85rem' }}>Name</label>
+                <label style={{ fontSize: '0.85rem' }}>{t('name')}</label>
                 <input 
                   type="text" 
                   className="form-control" 
-                  placeholder="Employee Name"
+                  placeholder={t('emp_name_placeholder')}
                   value={assignName}
                   onChange={e => setAssignName(e.target.value)}
                 />
               </div>
               <div className="form-group" style={{ marginBottom: '1rem' }}>
-                <label style={{ fontSize: '0.85rem' }}>Select Role</label>
+                <label style={{ fontSize: '0.85rem' }}>{t('select_role')}</label>
                 <select 
                   className="form-control" 
                   value={assignRoleType}
                   onChange={e => setAssignRoleType(e.target.value)}
                   style={{ backgroundColor: 'var(--bg-color)' }}
                 >
-                  <option value="gaushala_manager">Gaushala Manager</option>
-                  <option value="patrol_squad">Patrolling Squad</option>
-                  <option value="tagging_agent">QR Tagging Agent</option>
-                  <option value="admin">Administrator</option>
+                  <option value="gaushala_manager">{t('gaushala_manager')}</option>
+                  <option value="patrol_squad">{t('patrolling_squads')}</option>
+                  <option value="tagging_agent">{t('tagging_agents')}</option>
+                  <option value="admin">{t('admin')}</option>
                 </select>
               </div>
-              <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '0.75rem' }}>Assign Role</button>
+              <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '0.75rem' }}>{t('assign_role_btn')}</button>
             </form>
           </div>
         )}
@@ -288,28 +288,28 @@ export default function Dashboard() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1rem' }}>
             <div>
               <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
-                <AlertCircle size={20} color="var(--text-primary)" /> {user?.role === 'admin' ? 'Global Ledger' : 'Area Violations'}
+                <AlertCircle size={20} color="var(--text-primary)" /> {user?.role === 'admin' ? t('global_ledger') : t('area_violations')}
               </h3>
               
               {complaints.length === 0 ? (
                 <p className="card" style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>
-                  No recent patrol violations or reports yet.
+                  {t('no_recent_patrol')}
                 </p>
               ) : (
                 complaints.map((c, i) => (
                   <div key={i} className="card" style={{ borderLeft: `4px solid ${c.status === 'pending_seizure' ? 'var(--danger-color)' : (c.type === 'alert' ? '#eab308' : 'var(--primary-color)')}`, marginBottom: '1rem' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                      <strong>{c.type === 'alert' ? 'Community Report' : `Strike ${c.strikeLevel} Violation`}</strong>
+                      <strong>{c.type === 'alert' ? t('community_report') : t('strike_violation', {strikeLevel: c.strikeLevel})}</strong>
                       <span className="badge" style={{ backgroundColor: c.status === 'paid' ? 'var(--bg-color)' : 'rgba(239, 68, 68, 0.1)', color: c.status === 'paid' ? 'var(--text-secondary)' : 'var(--danger-color)' }}>
                         {c.status.toUpperCase()}
                       </span>
                     </div>
-                    <p style={{ margin: '0.25rem 0', fontSize: '0.875rem' }}>Cow ID: {c.cowQrId}</p>
-                    {c.reason && <p style={{ margin: '0', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Issue: {c.reason}</p>}
-                    {c.fine > 0 && <p style={{ margin: '0', fontSize: '0.875rem', fontWeight: 600 }}>Fine: ₹{c.fine}</p>}
+                    <p style={{ margin: '0.25rem 0', fontSize: '0.875rem' }}>{t('cow_id')}: {c.cowQrId}</p>
+                    {c.reason && <p style={{ margin: '0', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{t('issue')}{c.reason}</p>}
+                    {c.fine > 0 && <p style={{ margin: '0', fontSize: '0.875rem', fontWeight: 600 }}>{t('fine')}: ₹{c.fine}</p>}
                     <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>
-                      Loc: {c.location.lat.toFixed(4)}, {c.location.lng.toFixed(4)}
-                      <br />Time: {new Date(c.timestamp).toLocaleString()}
+                      {t('loc')}: {c.location.lat.toFixed(4)}, {c.location.lng.toFixed(4)}
+                      <br />{t('time')}: {new Date(c.timestamp).toLocaleString()}
                     </div>
                   </div>
                 ))
@@ -318,23 +318,23 @@ export default function Dashboard() {
 
             <div>
               <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
-                <MapPin size={20} color="#eab308" /> Spotted / Missing Animals
+                <MapPin size={20} color="#eab308" /> {t('spotted_missing_animals')}
               </h3>
               
               {missingReports.length === 0 ? (
                 <p className="card" style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>
-                  No missing or spotted animals reported.
+                  {t('no_missing_reported')}
                 </p>
               ) : (
                 missingReports.map((r, i) => (
                   <div key={i} className="card" style={{ borderLeft: `4px solid ${r.status === 'missing' ? 'var(--danger-color)' : '#eab308'}`, marginBottom: '1rem' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                      <strong>{r.status === 'missing' ? 'Reported Missing' : 'Animal Spotted'}</strong>
+                      <strong>{r.status === 'missing' ? t('reported_missing') : t('animal_spotted')}</strong>
                     </div>
-                    <p style={{ margin: '0.25rem 0', fontSize: '0.875rem' }}>Location: {r.location}</p>
-                    <p style={{ margin: '0', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Info: {r.description}</p>
+                    <p style={{ margin: '0.25rem 0', fontSize: '0.875rem' }}>{t('location')}{r.location}</p>
+                    <p style={{ margin: '0', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{t('info')}{r.description}</p>
                     <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-                      Contact: {r.reporterPhone}
+                      {t('contact')}{r.reporterPhone}
                     </p>
                   </div>
                 ))
