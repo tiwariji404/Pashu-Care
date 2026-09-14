@@ -112,7 +112,7 @@ export default function Dashboard() {
                onClick={() => navigate('/missing')} 
                style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', padding: '1.5rem 0.5rem', border: '1px solid var(--danger-hover)', borderRadius: '12px', backgroundColor: 'rgba(239, 68, 68, 0.05)', color: 'var(--danger-hover)', cursor: 'pointer', textAlign: 'center' }}>
                <FileText size={28} />
-               <strong style={{ fontSize: '0.9rem' }}>Reports</strong>
+               <strong style={{ fontSize: '0.9rem' }}>{t('reports') || 'Reports'}</strong>
              </button>
              <button 
                onClick={() => navigate('/knowledge')} 
