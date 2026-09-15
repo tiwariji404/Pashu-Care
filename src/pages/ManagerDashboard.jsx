@@ -2,12 +2,12 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAppStore } from '../store/appStore';
-import { Home, Users, CheckCircle, TrendingUp, Download, Package, HeartHandshake } from 'lucide-react';
+import { Home, Users, CheckCircle, TrendingUp, Download, Package, HeartHandshake, AlertTriangle } from 'lucide-react';
 import WorkerInventory from '../components/WorkerInventory';
 
 export default function ManagerDashboard() {
   const { t } = useTranslation();
-  const { user, cows } = useAppStore();
+  const { user, cows, injuredReports } = useAppStore();
   const navigate = useNavigate();
 
   // Simple stats for demonstration
@@ -47,6 +47,30 @@ export default function ManagerDashboard() {
              <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{t('admissions_today')}</p>
            </div>
         </div>
+
+        <h3 style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#b91c1c' }}>
+           <AlertTriangle size={20} /> Rescue Needed (Injured Animals)
+        </h3>
+        {injuredReports && injuredReports.length > 0 ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '2rem' }}>
+            {injuredReports.map((r, i) => (
+              <div key={i} className="card" style={{ borderColor: '#fca5a5', backgroundColor: '#fef2f2' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                  <strong style={{ color: '#991b1b' }}>Location: {r.location}</strong>
+                  <span className="badge" style={{ backgroundColor: '#ef4444', color: 'white' }}>{r.status.replace('_', ' ').toUpperCase()}</span>
+                </div>
+                <p style={{ margin: '0.5rem 0', fontSize: '0.875rem' }}>{r.description}</p>
+                <div style={{ fontSize: '0.75rem', color: '#b91c1c' }}>
+                  Reported by: {r.reportedBy} ({r.reporterPhone}) | {new Date(r.timestamp).toLocaleString()}
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="card" style={{ textAlign: 'center', color: 'var(--text-secondary)', marginBottom: '2rem' }}>
+            No active rescue requests.
+          </p>
+        )}
 
         <h3 style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><CheckCircle size={20} /> {t('management_actions')}</h3>
 

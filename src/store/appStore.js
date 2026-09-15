@@ -5,374 +5,423 @@ export const useAppStore = create(
   persist(
     (set, get) => ({
       user: null,
-  users: [],
-  cows: [], 
-  complaints: [],
-  revenue: { total: 0, municipality: 0, pppFirm: 0 },
-  missingReports: [],
-  gaushalas: [],
-  vets: [],
-  diseaseAlerts: [],
-  ambulances: [],
-  warehouseInventory: 0,
-  adoptions: [],
-  notifications: [],
+      users: [],
+      cows: [],
+      complaints: [],
+      revenue: { total: 0, municipality: 0, pppFirm: 0 },
+      missingReports: [],
+      gaushalas: [],
+      vets: [],
+      diseaseAlerts: [],
+      ambulances: [],
+      warehouseInventory: 0,
+      adoptions: [],
+      notifications: [],
+      tagRequests: [],
+      injuredReports: [],
+      fieldCamps: [],
 
-  init: async () => {
-    try {
-      // Demo injection for 00 tag
-      set(state => {
-        const hasDemo = state.cows.some(c => c.qrId === '00');
-        if (!hasDemo) {
-          const demoCow = {
-            qrId: "00",
-            species: "Cow",
-            breed: "Gir (Demo)",
-            age: 5,
-            health: "Good",
-            vaccination: "2026-01-15",
-            ownerName: "Ramesh Kumar",
-            aadhar: "987654321012",
-            phone: "9876543210", 
-            address: "Kisan Dairy Farm, Main Road",
-            photos: ["mock_photo_url"],
-            registeredAt: new Date().toISOString(),
-            strikes: 0,
-            seized: false
-          };
-          return { cows: [demoCow, ...state.cows] };
+      init: async () => {
+        try {
+          // Demo injection for 00 tag
+          set(state => {
+            const hasDemo = state.cows.some(c => c.qrId === '00');
+            if (!hasDemo) {
+              const demoCow = {
+                qrId: "00",
+                species: "Cow",
+                breed: "Gir (Demo)",
+                age: 5,
+                health: "Good",
+                vaccination: "2026-01-15",
+                ownerName: "Ramesh Kumar",
+                aadhar: "987654321012",
+                phone: "9876543210",
+                address: "Kisan Dairy Farm, Main Road",
+                photos: ["mock_photo_url"],
+                registeredAt: new Date().toISOString(),
+                strikes: 0,
+                seized: false
+              };
+              return { cows: [demoCow, ...state.cows] };
+            }
+            return state;
+          });
+
+          const res = await fetch('/api/state');
+          if (res.ok) {
+            const data = await res.json();
+            set({ ...data });
+          }
+        } catch (e) {
+          console.error('API Init Failed:', e);
         }
-        return state;
-      });
+      },
 
-      const res = await fetch('/api/state');
-      if (res.ok) {
-        const data = await res.json();
-        set({ ...data });
-      }
-    } catch (e) {
-      console.error('API Init Failed:', e);
-    }
-  },
+      allocateInventory: async (phone, amount) => {
+        try {
+          const res = await fetch('/api/inventory/transfer', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ phone, amount: Number(amount) })
+          });
+          if (res.ok) {
+            const data = await res.json();
+            set(state => {
+              const users = state.users.map(u =>
+                u.phone === phone ? { ...u, inventory: data.inventory } : u
+              );
+              return { users, warehouseInventory: data.warehouseInventory };
+            });
+          }
+        } catch (e) {
+          console.error('Inventory Transfer Failed:', e);
+        }
+      },
 
-  allocateInventory: async (phone, amount) => {
-    try {
-      const res = await fetch('/api/inventory/transfer', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone, amount: Number(amount) })
-      });
-      if (res.ok) {
-        const data = await res.json();
+      assignRole: (phone, name, role) => {
         set(state => {
-          const users = state.users.map(u => 
-            u.phone === phone ? { ...u, inventory: data.inventory } : u
+          const existingUserIndex = state.users.findIndex(u => u.phone === phone);
+          let updatedUsers = [...state.users];
+          let label = 'कार्य';
+          if (role === 'gaushala_manager') label = 'गौशाला क्षमता';
+          if (role === 'tagging_agent') label = 'QR टैग';
+          if (role === 'patrol_squad') label = 'गश्ती कार्य';
+
+          const activeHours = Math.floor(Math.random() * 9) + 4; // Mock 4-12 hours
+          if (existingUserIndex >= 0) {
+            updatedUsers[existingUserIndex] = { ...updatedUsers[existingUserIndex], role, name, activeHours: updatedUsers[existingUserIndex].activeHours || activeHours, inventory: { total: 100, remaining: 100, label } };
+          } else {
+            updatedUsers.push({ phone, role, name, location: 'Assigned by Admin', activeHours, inventory: { total: 100, remaining: 100, label } });
+          }
+
+          // Fire and forget API call
+          fetch('/api/users/assign-role', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ phone, name, role })
+          }).catch(console.error);
+
+          return { users: updatedUsers };
+        });
+      },
+
+      updateUserInventory: (phone, total, remaining) => {
+        set(state => {
+          const users = state.users.map(u =>
+            u.phone === phone ? { ...u, inventory: { ...u.inventory, total, remaining } } : u
           );
-          return { users, warehouseInventory: data.warehouseInventory };
+          const user = state.user?.phone === phone ? { ...state.user, inventory: { ...state.user.inventory, total, remaining } } : state.user;
+
+          fetch('/api/users/inventory', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ phone, total, remaining })
+          }).catch(console.error);
+
+          return { users, user };
+        });
+      },
+
+      checkUser: (phone) => {
+        if (phone === '9999999999') return true;
+        return get().users.some(u => u.phone === phone);
+      },
+
+      registerAndLogin: (phone, name, location, otp) => {
+        if (otp === '1234') {
+          const newUser = { phone, role: 'user', name, location };
+          set(state => ({
+            users: [...state.users, newUser],
+            user: newUser
+          }));
+
+          fetch('/api/auth/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ phone, name, location, otp })
+          }).catch(console.error);
+
+          return true;
+        }
+        return false;
+      },
+
+      login: (phone, otp) => {
+        if (otp === '1234') {
+          if (phone === '9999999999') {
+            set({ user: { phone, role: 'admin', name: 'Admin', location: 'HQ' } });
+            return true;
+          }
+
+          const existingUser = get().users.find(u => u.phone === phone);
+          if (existingUser) {
+            set({ user: existingUser });
+            return true;
+          }
+        }
+        return false;
+      },
+
+      logout: () => set({ user: null }),
+
+      registerCow: (cowData) => {
+        set((state) => {
+          fetch('/api/cows', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(cowData)
+          }).catch(console.error);
+
+          return { cows: [...state.cows, { ...cowData, strikes: 0, seized: false }] };
+        });
+      },
+
+      getCowByQrId: (qrId) => {
+        return get().cows.find(c => c.qrId === qrId);
+      },
+
+      getComplaintsByQrId: (qrId) => {
+        return get().complaints.filter(c => c.cowQrId === qrId);
+      },
+
+      reportComplaint: (complaintData) => {
+        set((state) => {
+          const cowIndex = state.cows.findIndex(c => c.qrId === complaintData.cowQrId);
+          if (cowIndex === -1) return state;
+
+          const cow = state.cows[cowIndex];
+          if (cow.seized) return state;
+
+          let newStrikes = cow.strikes;
+          let fine = 0;
+          let seized = false;
+          let type = 'alert';
+          let status = 'alert_sent';
+
+          let mapUrl = '';
+          if (complaintData.location) {
+            mapUrl = `https://maps.google.com/?q=${complaintData.location.lat},${complaintData.location.lng}`;
+          }
+
+          if (complaintData.issueFine) {
+            newStrikes += 1;
+            type = 'violation';
+            if (newStrikes === 1) fine = 1000;
+            else if (newStrikes === 2) fine = 3000;
+            else if (newStrikes >= 3) seized = true;
+            status = seized ? 'pending_seizure' : 'unpaid';
+          }
+
+          const newComplaint = {
+            ...complaintData,
+            mapUrl,
+            type,
+            strikeLevel: newStrikes,
+            fine,
+            status,
+            id: Date.now().toString()
+          };
+
+          const updatedCows = [...state.cows];
+          if (complaintData.issueFine) {
+            updatedCows[cowIndex] = { ...cow, strikes: newStrikes, seized };
+          }
+
+          fetch('/api/complaints', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(complaintData)
+          }).catch(console.error);
+
+          return {
+            complaints: [...state.complaints, newComplaint],
+            cows: updatedCows
+          };
+        });
+      },
+
+      payChallan: (complaintId) => {
+        set((state) => {
+          const cmpList = [...state.complaints];
+          const index = cmpList.findIndex(c => c.id === complaintId);
+          if (index === -1) return state;
+
+          const cmp = cmpList[index];
+          if (cmp.status === 'unpaid') {
+            cmp.status = 'paid';
+
+            const newTotal = state.revenue.total + cmp.fine;
+
+            fetch(`/api/complaints/${complaintId}/pay`, { method: 'PUT' }).catch(console.error);
+
+            return {
+              complaints: cmpList,
+              revenue: {
+                total: newTotal,
+                municipality: newTotal * 0.60,
+                pppFirm: newTotal * 0.40
+              }
+            };
+          }
+          return state;
+        });
+      },
+
+      disputeChallan: (complaintId) => {
+        set((state) => {
+          const cmpList = [...state.complaints];
+          const index = cmpList.findIndex(c => c.id === complaintId);
+          if (index !== -1 && cmpList[index].status === 'unpaid') {
+            cmpList[index].status = 'disputed';
+            fetch(`/api/complaints/${complaintId}/dispute`, { method: 'PUT' }).catch(console.error);
+          }
+          return { complaints: cmpList };
+        });
+      },
+
+      addMissingReport: (reportData) => {
+        set((state) => {
+          fetch('/api/missing', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(reportData)
+          }).catch(console.error);
+
+          return {
+            missingReports: [
+              { ...reportData, id: Date.now().toString(), timestamp: new Date().toISOString() },
+              ...state.missingReports
+            ]
+          };
+        });
+      },
+
+      addDiseaseAlert: (alertData) => {
+        set((state) => {
+          fetch('/api/alerts', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(alertData)
+          }).catch(console.error);
+
+          return {
+            diseaseAlerts: [
+              { ...alertData, id: Date.now().toString(), date: new Date().toISOString().split('T')[0] },
+              ...state.diseaseAlerts
+            ]
+          };
+        });
+      },
+      
+      reportInjuredAnimal: (reportData) => {
+        set((state) => {
+          fetch('/api/injured', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(reportData)
+          }).catch(console.error);
+
+          return {
+            injuredReports: [
+              { ...reportData, id: Date.now().toString(), timestamp: new Date().toISOString() },
+              ...state.injuredReports
+            ]
+          };
+        });
+      },
+
+      addAdoptionListing: (listingData) => {
+        set((state) => {
+          fetch('/api/adoptions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(listingData)
+          }).catch(console.error);
+
+          return {
+            adoptions: [
+              { ...listingData, id: Date.now().toString(), status: 'available', requests: [] },
+              ...state.adoptions
+            ]
+          };
+        });
+      },
+
+      requestAdoption: (adoptionId, requestData) => {
+        set((state) => {
+          let updatedAdoptions = [...state.adoptions];
+          const index = updatedAdoptions.findIndex(a => a.id === adoptionId);
+          if (index !== -1) {
+            updatedAdoptions[index] = {
+              ...updatedAdoptions[index],
+              requests: [
+                ...updatedAdoptions[index].requests,
+                { ...requestData, id: Date.now().toString(), status: 'pending' }
+              ]
+            };
+          }
+
+          fetch('/api/adoptions/request', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ adoptionId, requestData })
+          }).catch(console.error);
+
+          return { adoptions: updatedAdoptions };
+        });
+      },
+
+      addNotification: (notifData) => {
+        set((state) => {
+          fetch('/api/notifications', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(notifData)
+          }).catch(console.error);
+
+          return {
+            notifications: [
+              { ...notifData, id: Date.now().toString(), timestamp: new Date().toISOString(), read: false },
+              ...state.notifications
+            ]
+          };
+        });
+      },
+
+      requestTags: (phone, amount) => {
+        set((state) => {
+          const newReq = { phone, amount, id: Date.now().toString(), status: 'pending', timestamp: new Date().toISOString() };
+          fetch('/api/tag-requests', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(newReq)
+          }).catch(console.error);
+
+          return {
+            tagRequests: [
+              newReq,
+              ...state.tagRequests
+            ]
+          };
+        });
+      },
+
+      approveTagRequest: (id) => {
+        set((state) => {
+          fetch(`/api/tag-requests/${id}/approve`, { method: 'PUT' })
+          .then(res => res.json())
+          .then(data => {
+            if(data.success) {
+              set({ tagRequests: data.tagRequests, users: data.users, warehouseInventory: data.warehouseInventory });
+            }
+          }).catch(console.error);
+          
+          return {
+            tagRequests: state.tagRequests.map(r => r.id === id ? { ...r, status: 'approved' } : r)
+          };
         });
       }
-    } catch (e) {
-      console.error('Inventory Transfer Failed:', e);
-    }
-  },
-
-  assignRole: (phone, name, role) => {
-    set(state => {
-      const existingUserIndex = state.users.findIndex(u => u.phone === phone);
-      let updatedUsers = [...state.users];
-      let label = 'कार्य';
-      if(role === 'gaushala_manager') label = 'गौशाला क्षमता';
-      if(role === 'tagging_agent') label = 'QR टैग';
-      if(role === 'patrol_squad') label = 'गश्ती कार्य';
-
-      const activeHours = Math.floor(Math.random() * 9) + 4; // Mock 4-12 hours
-      if (existingUserIndex >= 0) {
-        updatedUsers[existingUserIndex] = { ...updatedUsers[existingUserIndex], role, name, activeHours: updatedUsers[existingUserIndex].activeHours || activeHours, inventory: { total: 100, remaining: 100, label } };
-      } else {
-        updatedUsers.push({ phone, role, name, location: 'Assigned by Admin', activeHours, inventory: { total: 100, remaining: 100, label } });
-      }
-
-      // Fire and forget API call
-      fetch('/api/users/assign-role', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone, name, role })
-      }).catch(console.error);
-
-      return { users: updatedUsers };
-    });
-  },
-
-  updateUserInventory: (phone, total, remaining) => {
-    set(state => {
-      const users = state.users.map(u => 
-        u.phone === phone ? { ...u, inventory: { ...u.inventory, total, remaining } } : u
-      );
-      const user = state.user?.phone === phone ? { ...state.user, inventory: { ...state.user.inventory, total, remaining } } : state.user;
-      
-      fetch('/api/users/inventory', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone, total, remaining })
-      }).catch(console.error);
-
-      return { users, user };
-    });
-  },
-
-  checkUser: (phone) => {
-    if (phone === '9999999999') return true;
-    return get().users.some(u => u.phone === phone);
-  },
-
-  registerAndLogin: (phone, name, location, otp) => {
-    if (otp === '1234') {
-      const newUser = { phone, role: 'user', name, location };
-      set(state => ({
-        users: [...state.users, newUser],
-        user: newUser
-      }));
-
-      fetch('/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone, name, location, otp })
-      }).catch(console.error);
-
-      return true;
-    }
-    return false;
-  },
-
-  login: (phone, otp) => {
-    if (otp === '1234') {
-      if (phone === '9999999999') {
-        set({ user: { phone, role: 'admin', name: 'Admin', location: 'HQ' } });
-        return true;
-      }
-      
-      const existingUser = get().users.find(u => u.phone === phone);
-      if (existingUser) {
-        set({ user: existingUser });
-        return true;
-      }
-    }
-    return false;
-  },
-
-  logout: () => set({ user: null }),
-
-  registerCow: (cowData) => {
-    set((state) => {
-      fetch('/api/cows', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(cowData)
-      }).catch(console.error);
-      
-      return { cows: [...state.cows, { ...cowData, strikes: 0, seized: false }] };
-    });
-  },
-
-  getCowByQrId: (qrId) => {
-    return get().cows.find(c => c.qrId === qrId);
-  },
-
-  getComplaintsByQrId: (qrId) => {
-    return get().complaints.filter(c => c.cowQrId === qrId);
-  },
-
-  reportComplaint: (complaintData) => {
-    set((state) => {
-      const cowIndex = state.cows.findIndex(c => c.qrId === complaintData.cowQrId);
-      if (cowIndex === -1) return state;
-
-      const cow = state.cows[cowIndex];
-      if (cow.seized) return state;
-
-      let newStrikes = cow.strikes;
-      let fine = 0;
-      let seized = false;
-      let type = 'alert';
-      let status = 'alert_sent';
-      
-      let mapUrl = '';
-      if (complaintData.location) {
-        mapUrl = `https://maps.google.com/?q=${complaintData.location.lat},${complaintData.location.lng}`;
-      }
-
-      if (complaintData.issueFine) {
-        newStrikes += 1;
-        type = 'violation';
-        if (newStrikes === 1) fine = 1000;
-        else if (newStrikes === 2) fine = 3000;
-        else if (newStrikes >= 3) seized = true;
-        status = seized ? 'pending_seizure' : 'unpaid';
-      }
-
-      const newComplaint = {
-        ...complaintData,
-        mapUrl,
-        type,
-        strikeLevel: newStrikes,
-        fine,
-        status,
-        id: Date.now().toString()
-      };
-
-      const updatedCows = [...state.cows];
-      if (complaintData.issueFine) {
-        updatedCows[cowIndex] = { ...cow, strikes: newStrikes, seized };
-      }
-
-      fetch('/api/complaints', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newComplaint)
-      }).catch(console.error);
-
-      return {
-        complaints: [...state.complaints, newComplaint],
-        cows: updatedCows
-      };
-    });
-  },
-
-  payChallan: (complaintId) => {
-    set((state) => {
-      const cmpList = [...state.complaints];
-      const index = cmpList.findIndex(c => c.id === complaintId);
-      if (index === -1) return state;
-
-      const cmp = cmpList[index];
-      if (cmp.status === 'unpaid') {
-        cmp.status = 'paid';
-        
-        const newTotal = state.revenue.total + cmp.fine;
-        
-        fetch(`/api/complaints/${complaintId}/pay`, { method: 'PUT' }).catch(console.error);
-
-        return {
-          complaints: cmpList,
-          revenue: {
-            total: newTotal,
-            municipality: newTotal * 0.60,
-            pppFirm: newTotal * 0.40
-          }
-        };
-      }
-      return state;
-    });
-  },
-
-  disputeChallan: (complaintId) => {
-    set((state) => {
-      const cmpList = [...state.complaints];
-      const index = cmpList.findIndex(c => c.id === complaintId);
-      if (index !== -1 && cmpList[index].status === 'unpaid') {
-        cmpList[index].status = 'disputed';
-        fetch(`/api/complaints/${complaintId}/dispute`, { method: 'PUT' }).catch(console.error);
-      }
-      return { complaints: cmpList };
-    });
-  },
-
-  addMissingReport: (reportData) => {
-    set((state) => {
-      const newReport = { ...reportData, id: Date.now().toString(), timestamp: new Date().toISOString() };
-      fetch('/api/missing', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newReport)
-      }).catch(console.error);
-
-      return {
-        missingReports: [
-          newReport,
-          ...state.missingReports
-        ]
-      };
-    });
-  },
-
-  addDiseaseAlert: (alertData) => {
-    set((state) => {
-      const newAlert = { ...alertData, id: Date.now().toString(), date: new Date().toISOString().split('T')[0] };
-      fetch('/api/alerts', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newAlert)
-      }).catch(console.error);
-
-      return {
-        diseaseAlerts: [
-          newAlert,
-          ...state.diseaseAlerts
-        ]
-      };
-    });
-  },
-
-  addAdoptionListing: (listingData) => {
-    set((state) => {
-      const newListing = { ...listingData, id: Date.now().toString(), status: 'available', requests: [] };
-      fetch('/api/adoptions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newListing)
-      }).catch(console.error);
-
-      return {
-        adoptions: [
-          newListing,
-          ...state.adoptions
-        ]
-      };
-    });
-  },
-
-  requestAdoption: (adoptionId, requestData) => {
-    set((state) => {
-      const newRequest = { ...requestData, id: Date.now().toString(), status: 'pending' };
-      let updatedAdoptions = [...state.adoptions];
-      const index = updatedAdoptions.findIndex(a => a.id === adoptionId);
-      if (index !== -1) {
-        updatedAdoptions[index] = {
-          ...updatedAdoptions[index],
-          requests: [
-            ...updatedAdoptions[index].requests,
-            newRequest
-          ]
-        };
-      }
-
-      fetch('/api/adoptions/request', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ adoptionId, requestData: newRequest })
-      }).catch(console.error);
-
-      return { adoptions: updatedAdoptions };
-    });
-  },
-
-  addNotification: (notifData) => {
-    set((state) => {
-      const newNotif = { ...notifData, id: Date.now().toString(), timestamp: new Date().toISOString(), read: false };
-      fetch('/api/notifications', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newNotif)
-      }).catch(console.error);
-
-      return {
-        notifications: [
-          newNotif,
-          ...state.notifications
-        ]
-      };
-    });
-  }
     }),
     {
       name: 'pashu-care-storage',

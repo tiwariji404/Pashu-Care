@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '../store/appStore';
 import { Shield, Map, AlertTriangle, Crosshair, Search } from 'lucide-react';
 import WorkerInventory from '../components/WorkerInventory';
+import EmergencySOS from '../components/EmergencySOS';
 
 export default function PatrolDashboard() {
   const { user, complaints } = useAppStore();
@@ -62,6 +63,10 @@ export default function PatrolDashboard() {
           <button className="btn btn-outline" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem' }} onClick={() => navigate('/ambulance')}>
             <span style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}><AlertTriangle size={20} /> Call Transport/Rescue</span>
           </button>
+        </div>
+
+        <div style={{ marginTop: '2rem' }}>
+          <EmergencySOS />
         </div>
 
         <h3 style={{ marginTop: '2rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>

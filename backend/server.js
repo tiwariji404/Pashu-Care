@@ -71,7 +71,12 @@ let state = {
   adoptions: [
     { id: 'ad1', type: 'Cow', breed: 'Sahiwal', age: 3, health: 'Healthy', photo: 'https://images.unsplash.com/photo-1546445317-29f4545e9d53?w=500&q=80', description: 'Very calm. Rescued from highway.', status: 'available', requests: [] }
   ],
-  notifications: []
+  notifications: [],
+  tagRequests: [],
+  injuredReports: [],
+  fieldCamps: [
+    { id: 'fc1', location: 'Ward 5, Garhwa', date: '2026-09-17', status: 'upcoming', type: 'Tagging Camp' }
+  ]
 };
 
 // API: GET FULL STATE (For simple initial load)
@@ -88,7 +93,10 @@ app.get('/api/state', (req, res) => {
     ambulances: state.ambulances,
     warehouseInventory: state.warehouseInventory,
     adoptions: state.adoptions,
-    notifications: state.notifications
+    notifications: state.notifications,
+    tagRequests: state.tagRequests,
+    injuredReports: state.injuredReports,
+    fieldCamps: state.fieldCamps
   });
 });
 
@@ -293,12 +301,51 @@ app.post('/api/adoptions/request', (req, res) => {
   }
 });
 
+// API: INJURED REPORTS
+app.post('/api/injured', (req, res) => {
+  const reportData = req.body;
+  const newReport = { id: Date.now().toString(), timestamp: new Date().toISOString(), ...reportData };
+  state.injuredReports.unshift(newReport);
+  res.json({ success: true, injuredReports: state.injuredReports });
+});
+
 // API: NOTIFICATIONS
 app.post('/api/notifications', (req, res) => {
   const notifData = req.body;
   const newNotif = { id: Date.now().toString(), timestamp: new Date().toISOString(), read: false, ...notifData };
   state.notifications.unshift(newNotif);
   res.json({ success: true, notifications: state.notifications });
+});
+
+// API: TAG REQUESTS
+app.post('/api/tag-requests', (req, res) => {
+  const reqData = req.body;
+  const newReq = { id: req.body.id || Date.now().toString(), status: 'pending', timestamp: new Date().toISOString(), ...reqData };
+  state.tagRequests.unshift(newReq);
+  res.json({ success: true, tagRequests: state.tagRequests });
+});
+
+app.put('/api/tag-requests/:id/approve', (req, res) => {
+  const reqId = req.params.id;
+  const index = state.tagRequests.findIndex(r => r.id === reqId);
+  if (index !== -1 && state.tagRequests[index].status === 'pending') {
+    const tReq = state.tagRequests[index];
+    tReq.status = 'approved';
+    const amount = Number(tReq.amount);
+    
+    const userIndex = state.users.findIndex(u => u.phone === tReq.phone);
+    if (userIndex !== -1) {
+      if (!state.users[userIndex].inventory) {
+        state.users[userIndex].inventory = { total: 0, remaining: 0, label: 'QR टैग' };
+      }
+      state.users[userIndex].inventory.total += amount;
+      state.users[userIndex].inventory.remaining += amount;
+    }
+    state.warehouseInventory -= amount;
+    
+    return res.json({ success: true, tagRequests: state.tagRequests, users: state.users, warehouseInventory: state.warehouseInventory });
+  }
+  res.status(400).json({ error: 'Unable to approve' });
 });
 
 const PORT = 3001;
