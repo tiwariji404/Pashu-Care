@@ -228,7 +228,7 @@ export const useAppStore = create(
       fetch('/api/complaints', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(complaintData)
+        body: JSON.stringify(newComplaint)
       }).catch(console.error);
 
       return {
@@ -279,15 +279,16 @@ export const useAppStore = create(
 
   addMissingReport: (reportData) => {
     set((state) => {
+      const newReport = { ...reportData, id: Date.now().toString(), timestamp: new Date().toISOString() };
       fetch('/api/missing', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(reportData)
+        body: JSON.stringify(newReport)
       }).catch(console.error);
 
       return {
         missingReports: [
-          { ...reportData, id: Date.now().toString(), timestamp: new Date().toISOString() },
+          newReport,
           ...state.missingReports
         ]
       };
@@ -296,15 +297,16 @@ export const useAppStore = create(
 
   addDiseaseAlert: (alertData) => {
     set((state) => {
+      const newAlert = { ...alertData, id: Date.now().toString(), date: new Date().toISOString().split('T')[0] };
       fetch('/api/alerts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(alertData)
+        body: JSON.stringify(newAlert)
       }).catch(console.error);
 
       return {
         diseaseAlerts: [
-          { ...alertData, id: Date.now().toString(), date: new Date().toISOString().split('T')[0] },
+          newAlert,
           ...state.diseaseAlerts
         ]
       };
@@ -313,15 +315,16 @@ export const useAppStore = create(
 
   addAdoptionListing: (listingData) => {
     set((state) => {
+      const newListing = { ...listingData, id: Date.now().toString(), status: 'available', requests: [] };
       fetch('/api/adoptions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(listingData)
+        body: JSON.stringify(newListing)
       }).catch(console.error);
 
       return {
         adoptions: [
-          { ...listingData, id: Date.now().toString(), status: 'available', requests: [] },
+          newListing,
           ...state.adoptions
         ]
       };
@@ -330,6 +333,7 @@ export const useAppStore = create(
 
   requestAdoption: (adoptionId, requestData) => {
     set((state) => {
+      const newRequest = { ...requestData, id: Date.now().toString(), status: 'pending' };
       let updatedAdoptions = [...state.adoptions];
       const index = updatedAdoptions.findIndex(a => a.id === adoptionId);
       if (index !== -1) {
@@ -337,7 +341,7 @@ export const useAppStore = create(
           ...updatedAdoptions[index],
           requests: [
             ...updatedAdoptions[index].requests,
-            { ...requestData, id: Date.now().toString(), status: 'pending' }
+            newRequest
           ]
         };
       }
@@ -345,7 +349,7 @@ export const useAppStore = create(
       fetch('/api/adoptions/request', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ adoptionId, requestData })
+        body: JSON.stringify({ adoptionId, requestData: newRequest })
       }).catch(console.error);
 
       return { adoptions: updatedAdoptions };
@@ -354,15 +358,16 @@ export const useAppStore = create(
 
   addNotification: (notifData) => {
     set((state) => {
+      const newNotif = { ...notifData, id: Date.now().toString(), timestamp: new Date().toISOString(), read: false };
       fetch('/api/notifications', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(notifData)
+        body: JSON.stringify(newNotif)
       }).catch(console.error);
 
       return {
         notifications: [
-          { ...notifData, id: Date.now().toString(), timestamp: new Date().toISOString(), read: false },
+          newNotif,
           ...state.notifications
         ]
       };

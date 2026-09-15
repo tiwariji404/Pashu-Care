@@ -12,7 +12,24 @@ let state = {
     { phone: '2222222222', role: 'patrol_squad', name: 'Bishal', location: 'HQ', activeHours: 12, inventory: { total: 50, remaining: 20, label: 'गश्ती कार्य' } },
     { phone: '3333333333', role: 'tagging_agent', name: 'XYZ', location: 'Field', activeHours: 6, inventory: { total: 200, remaining: 85, label: 'QR टैग' } }
   ],
-  cows: [],
+  cows: [
+    {
+      qrId: "00",
+      species: "Cow",
+      breed: "Gir (Demo)",
+      age: 5,
+      health: "Good",
+      vaccination: "2026-01-15",
+      ownerName: "Ramesh Kumar",
+      aadhar: "987654321012",
+      phone: "9876543210", 
+      address: "Kisan Dairy Farm, Main Road",
+      photos: ["mock_photo_url"],
+      registeredAt: new Date().toISOString(),
+      strikes: 0,
+      seized: false
+    }
+  ],
   complaints: [],
   revenue: { total: 0, municipality: 0, pppFirm: 0 },
   missingReports: [
@@ -202,7 +219,7 @@ app.post('/api/complaints', (req, res) => {
     strikeLevel: newStrikes,
     fine,
     status,
-    id: Date.now().toString()
+    id: req.body.id || Date.now().toString()
   };
 
   if (issueFine) {
@@ -244,7 +261,7 @@ app.put('/api/complaints/:id/dispute', (req, res) => {
 // API: MISSING REPORTS
 app.post('/api/missing', (req, res) => {
   const reportData = req.body;
-  const newReport = { ...reportData, id: Date.now().toString(), timestamp: new Date().toISOString() };
+  const newReport = { id: Date.now().toString(), timestamp: new Date().toISOString(), ...reportData };
   state.missingReports.unshift(newReport);
   res.json({ success: true, missingReports: state.missingReports });
 });
@@ -252,7 +269,7 @@ app.post('/api/missing', (req, res) => {
 // API: DISEASE ALERTS
 app.post('/api/alerts', (req, res) => {
   const alertData = req.body;
-  const newAlert = { ...alertData, id: Date.now().toString(), date: new Date().toISOString().split('T')[0] };
+  const newAlert = { id: Date.now().toString(), date: new Date().toISOString().split('T')[0], ...alertData };
   state.diseaseAlerts.unshift(newAlert);
   res.json({ success: true, diseaseAlerts: state.diseaseAlerts });
 });
@@ -260,7 +277,7 @@ app.post('/api/alerts', (req, res) => {
 // API: ADOPTIONS
 app.post('/api/adoptions', (req, res) => {
   const listingData = req.body;
-  const newListing = { ...listingData, id: Date.now().toString(), status: 'available', requests: [] };
+  const newListing = { id: Date.now().toString(), status: 'available', requests: [], ...listingData };
   state.adoptions.unshift(newListing);
   res.json({ success: true, adoptions: state.adoptions });
 });
@@ -269,7 +286,7 @@ app.post('/api/adoptions/request', (req, res) => {
   const { adoptionId, requestData } = req.body;
   const index = state.adoptions.findIndex(a => a.id === adoptionId);
   if (index !== -1) {
-    state.adoptions[index].requests.push({ ...requestData, id: Date.now().toString(), status: 'pending' });
+    state.adoptions[index].requests.push({ id: Date.now().toString(), status: 'pending', ...requestData });
     res.json({ success: true, adoptions: state.adoptions });
   } else {
     res.status(404).json({ error: 'Listing not found' });
@@ -279,7 +296,7 @@ app.post('/api/adoptions/request', (req, res) => {
 // API: NOTIFICATIONS
 app.post('/api/notifications', (req, res) => {
   const notifData = req.body;
-  const newNotif = { ...notifData, id: Date.now().toString(), timestamp: new Date().toISOString(), read: false };
+  const newNotif = { id: Date.now().toString(), timestamp: new Date().toISOString(), read: false, ...notifData };
   state.notifications.unshift(newNotif);
   res.json({ success: true, notifications: state.notifications });
 });
