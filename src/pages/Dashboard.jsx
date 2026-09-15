@@ -285,64 +285,7 @@ export default function Dashboard() {
         )}
 
 
-        <div style={{ marginTop: '2rem' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1rem' }}>
-            <div>
-              <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
-                <AlertCircle size={20} color="var(--text-primary)" /> {user?.role === 'admin' ? t('global_ledger') : t('area_violations')}
-              </h3>
-              
-              {complaints.length === 0 ? (
-                <p className="card" style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>
-                  {t('no_recent_patrol')}
-                </p>
-              ) : (
-                complaints.map((c, i) => (
-                  <div key={i} className="card" style={{ borderLeft: `4px solid ${c.status === 'pending_seizure' ? 'var(--danger-color)' : (c.type === 'alert' ? '#eab308' : 'var(--primary-color)')}`, marginBottom: '1rem' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                      <strong>{c.type === 'alert' ? t('community_report') : t('strike_violation', {strikeLevel: c.strikeLevel})}</strong>
-                      <span className="badge" style={{ backgroundColor: c.status === 'paid' ? 'var(--bg-color)' : 'rgba(239, 68, 68, 0.1)', color: c.status === 'paid' ? 'var(--text-secondary)' : 'var(--danger-color)' }}>
-                        {c.status.toUpperCase()}
-                      </span>
-                    </div>
-                    <p style={{ margin: '0.25rem 0', fontSize: '0.875rem' }}>{t('cow_id')}: {c.cowQrId}</p>
-                    {c.reason && <p style={{ margin: '0', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{t('issue')}{c.reason}</p>}
-                    {c.fine > 0 && <p style={{ margin: '0', fontSize: '0.875rem', fontWeight: 600 }}>{t('fine')}: ₹{c.fine}</p>}
-                    <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>
-                      {t('loc')}: {c.location.lat.toFixed(4)}, {c.location.lng.toFixed(4)}
-                      <br />{t('time')}: {new Date(c.timestamp).toLocaleString()}
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
 
-            <div>
-              <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
-                <MapPin size={20} color="#eab308" /> {t('spotted_missing_animals')}
-              </h3>
-              
-              {missingReports.length === 0 ? (
-                <p className="card" style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>
-                  {t('no_missing_reported')}
-                </p>
-              ) : (
-                missingReports.map((r, i) => (
-                  <div key={i} className="card" style={{ borderLeft: `4px solid ${r.status === 'missing' ? 'var(--danger-color)' : '#eab308'}`, marginBottom: '1rem' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                      <strong>{r.status === 'missing' ? t('reported_missing') : t('animal_spotted')}</strong>
-                    </div>
-                    <p style={{ margin: '0.25rem 0', fontSize: '0.875rem' }}>{t('location')}{r.location}</p>
-                    <p style={{ margin: '0', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{t('info')}{r.description}</p>
-                    <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-                      {t('contact')}{r.reporterPhone}
-                    </p>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-        </div>
 
       </div>
     </>
