@@ -36,7 +36,7 @@ export default function AdoptionPortal() {
     
     addAdoptionListing({
       ...addForm,
-      photo: 'https://images.unsplash.com/photo-1546445317-29f4545e9d53?w=500&q=80', // Dummy photo for now
+      photo: 'https://images.unsplash.com/photo-1546445317-29f4545e9d53?w=500&q=80', // placeholder photo
       managerPhone: user?.phone,
       location: user?.location || 'HQ'
     });

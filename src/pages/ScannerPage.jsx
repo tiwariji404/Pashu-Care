@@ -17,7 +17,7 @@ export default function ScannerPage() {
     if (scannerInitialized.current) return;
     scannerInitialized.current = true;
 
-    // Setup html5-qrcode scanner
+    // init scanner
     const scanner = new Html5QrcodeScanner(
       "reader",
       { fps: 10, qrbox: {width: 250, height: 250}, aspectRatio: 1.0 },
@@ -25,7 +25,7 @@ export default function ScannerPage() {
     );
 
     const onScanSuccess = (decodedText) => {
-      // Clean up string
+      // cleanup
       const uid = decodedText.trim();
       scanner.clear();
       processScannedCode(uid);
@@ -43,7 +43,7 @@ export default function ScannerPage() {
   }, []);
 
   const processScannedCode = (uid) => {
-    // 15-digit code validation (loose validation for demo purposes)
+    // weak validation for demo
     if (uid.length < 2) {
       setError("Invalid RFID tag. Code must be longer.");
       return;
@@ -51,10 +51,10 @@ export default function ScannerPage() {
 
     const cow = getCowByQrId(uid);
     if (cow) {
-      // Found the cow, go to details
+      // navigate to existing
       navigate(`/cow/${uid}`);
     } else {
-      // Not registered
+      // not found, register new
       if (user?.role === 'tagging_agent') {
         navigate(`/register/${uid}`);
       } else {
@@ -66,8 +66,7 @@ export default function ScannerPage() {
   const handleManualSubmit = (e) => {
     e.preventDefault();
     if(manualCode) {
-      // Hack to stop the camera instance since scanner.clear is tied to the effect scope, 
-      // best handled by just navigating away which unmounts the component
+      // unmount hack to drop camera instance
       processScannedCode(manualCode);
     }
   };

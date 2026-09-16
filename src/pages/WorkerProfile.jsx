@@ -29,12 +29,11 @@ export default function WorkerProfile() {
   const used = inv.total - inv.remaining;
   const progressPercent = inv.total > 0 ? (used / inv.total) * 100 : 0;
 
-  // Filter tasks based on worker role for advanced details
+  // filter tasks by role
   let recentActivities = [];
   if (worker.role === 'tagging_agent') {
-    // Cows tagged 
-    // In our mock DB, we don't have "taggedBy", but we can pretend to map it if we really wanted to. 
-    // To keep it simple, we'll just show the latest 3 overall or a mock list. 
+    // cows tagged
+    // mock latest 3 since no taggedBy mapping is in db
     recentActivities = cows.slice(0, 3).map(cow => ({ type: 'Registration', text: `Tagged ${cow.breed}`, detail: `UID: ${cow.qrId.substring(0,6)}...` }));
   } else if (worker.role === 'patrol_squad') {
     recentActivities = complaints.filter(c => c.type === 'violation').slice(0, 3).map(c => ({ type: 'E-Challan', text: `Issued Fine ₹${c.fine}`, detail: `UID: ${c.cowQrId.substring(0,6)}...` }));

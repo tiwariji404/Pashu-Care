@@ -10,10 +10,10 @@ export default function ManagerDashboard() {
   const { user, cows, injuredReports } = useAppStore();
   const navigate = useNavigate();
 
-  // Simple stats for demonstration
+  // generic stats
   const totalCattle = cows.length;
-  // Let's pretend some cows are assigned to this manager's location
-  const myFacilityCows = cows.filter(c => c.healthStatus === 'Healthy' || true).length; // demo logic
+  // assign to facility
+  const myFacilityCows = cows.filter(c => c.healthStatus === 'Healthy' || true).length; // mock override
 
   return (
     <>

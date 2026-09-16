@@ -62,7 +62,7 @@ export default function AgentRegistration() {
     };
 
     registerCow(cowData);
-    navigate(`/cow/${qrId}`); // Navigate to Details page to confirm
+    navigate(`/cow/${qrId}`); // goto details to confirm
   };
 
   return (

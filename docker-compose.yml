@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  backend:
+    build: 
+      context: ./backend
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=development
+    networks:
+      - safecow-network
+
+  frontend:
+    build:
+      context: .
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://backend:3001
+    volumes:
+      - ./src:/app/src
+    depends_on:
+      - backend
+    networks:
+      - safecow-network
+
+networks:
+  safecow-network:
+    driver: bridge

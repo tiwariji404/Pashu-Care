@@ -66,7 +66,7 @@ export default function CowDetails() {
 
           reportComplaint(complaintData);
           
-          // Add to Area Feed for BOTH Patrol and Citizens
+          // push to area feed
           addMissingReport({
             ownerName: cow.ownerName,
             location: user?.location || 'Garhwa',
@@ -76,7 +76,7 @@ export default function CowDetails() {
             description: `${user?.role === 'patrol_squad' ? '[PATROL SQUAD] ' : ''}Spotted Animal (Tag: ${qrId}). Note: ${reason}`
           });
           
-          // Send Real-Time Notification to Owner
+          // notify owner
           addNotification({
             targetPhone: cow.ownerPhone || '9999999999',
             message: `Your animal (Tag: ${qrId}) was reported as spotted/stray by ${user?.name || 'someone'}. Location: ${user?.location || 'Unknown'}. Note: ${reason}.`,
@@ -89,7 +89,7 @@ export default function CowDetails() {
           setPhotoPreview(null);
           setLandmark('');
           
-          setTimeout(() => setComplaintStatus(''), 3000); // Clear success msg
+          setTimeout(() => setComplaintStatus(''), 3000); // clear msg
         },
         (err) => {
           setComplaintStatus('');

@@ -9,7 +9,7 @@ export default function PatrolDashboard() {
   const { user, complaints } = useAppStore();
   const navigate = useNavigate();
 
-  const myReports = complaints.filter(c => c.reporterPhone === user?.phone || true); // Assuming all for demo
+  const myReports = complaints.filter(c => c.reporterPhone === user?.phone || true); // mock grab all
   const myViolationsLogged = myReports.length;
   const pendingSeizures = complaints.filter(c => c.status === 'pending_seizure').length;
 

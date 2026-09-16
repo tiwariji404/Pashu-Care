@@ -6,7 +6,7 @@ export default function WorkerInventory() {
   const { user, updateUserInventory } = useAppStore();
   const [isEditing, setIsEditing] = useState(false);
   
-  // Provide defaults in case inventory doesn't exist on older mock users
+  // fallback for older user models
   const inventory = user?.inventory || { total: 0, remaining: 0, label: 'कार्य' };
   const [total, setTotal] = useState(inventory.total);
   const [remaining, setRemaining] = useState(inventory.remaining);

@@ -5,7 +5,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// IN-MEMORY DATA STORE
+// active state db
 let state = {
   users: [
     { phone: '1111111111', role: 'gaushala_manager', name: 'Raj Tiwari', location: 'Garhwa', activeHours: 8, inventory: { total: 100, remaining: 50, label: 'गौशाला क्षमता' } },
@@ -79,7 +79,7 @@ let state = {
   ]
 };
 
-// API: GET FULL STATE (For simple initial load)
+// get frontend state
 app.get('/api/state', (req, res) => {
   res.json({
     users: state.users,
@@ -100,7 +100,7 @@ app.get('/api/state', (req, res) => {
   });
 });
 
-// API: TRANSFER INVENTORY
+// handle inventory transfers
 app.post('/api/inventory/transfer', (req, res) => {
   const { phone, amount } = req.body;
   const user = state.users.find(u => u.phone === phone);
@@ -115,7 +115,7 @@ app.post('/api/inventory/transfer', (req, res) => {
   }
 });
 
-// API: AUTHENTICATION
+// auth
 app.post('/api/auth/login', (req, res) => {
   const { phone, otp } = req.body;
   if (otp === '1234') {
@@ -147,7 +147,7 @@ app.get('/api/auth/check/:phone', (req, res) => {
   res.json({ exists });
 });
 
-// API: USERS
+// user roles
 app.post('/api/users/assign-role', (req, res) => {
   const { phone, name, role } = req.body;
   
@@ -157,7 +157,7 @@ app.post('/api/users/assign-role', (req, res) => {
   if(role === 'patrol_squad') label = 'गश्ती कार्य';
 
   const existingUserIndex = state.users.findIndex(u => u.phone === phone);
-  const activeHours = Math.floor(Math.random() * 9) + 4; // Mock 4-12 hours
+  const activeHours = Math.floor(Math.random() * 9) + 4; // assign random shift hours
   if (existingUserIndex >= 0) {
     state.users[existingUserIndex] = { ...state.users[existingUserIndex], role, name, activeHours: state.users[existingUserIndex].activeHours || activeHours, inventory: { total: 100, remaining: 100, label } };
   } else {
@@ -174,14 +174,14 @@ app.put('/api/users/inventory', (req, res) => {
   res.json({ success: true, users: state.users });
 });
 
-// API: COWS
+// cows
 app.post('/api/cows', (req, res) => {
   const cowData = req.body;
   state.cows.push({ ...cowData, strikes: 0, seized: false });
   res.json({ success: true, cows: state.cows });
 });
 
-// API: COMPLAINTS
+// complaints route
 app.post('/api/complaints', (req, res) => {
   const { cowQrId, location, timestamp, reporterPhone, reason, photo, animalState, landmark, issueFine } = req.body;
   const cowIndex = state.cows.findIndex(c => c.qrId === cowQrId);
@@ -195,7 +195,7 @@ app.post('/api/complaints', (req, res) => {
     mapUrl = `https://maps.google.com/?q=${location.lat},${location.lng}`;
   }
 
-  // MOCK SMS LOGIC
+  // trigger sms gateway
   console.log(`\n[SMS MOCK] Dispatching to Owner (${cow.ownerName}): "Your animal (${cow.breed}) was reported by a patrol squad. Location: ${mapUrl}"\n`);
 
   let newStrikes = cow.strikes;
@@ -266,7 +266,7 @@ app.put('/api/complaints/:id/dispute', (req, res) => {
   res.status(400).json({ error: 'Unable to dispute' });
 });
 
-// API: MISSING REPORTS
+// missing reports
 app.post('/api/missing', (req, res) => {
   const reportData = req.body;
   const newReport = { id: Date.now().toString(), timestamp: new Date().toISOString(), ...reportData };
@@ -274,7 +274,7 @@ app.post('/api/missing', (req, res) => {
   res.json({ success: true, missingReports: state.missingReports });
 });
 
-// API: DISEASE ALERTS
+// disease reporting
 app.post('/api/alerts', (req, res) => {
   const alertData = req.body;
   const newAlert = { id: Date.now().toString(), date: new Date().toISOString().split('T')[0], ...alertData };
@@ -282,7 +282,7 @@ app.post('/api/alerts', (req, res) => {
   res.json({ success: true, diseaseAlerts: state.diseaseAlerts });
 });
 
-// API: ADOPTIONS
+// cattle adoptions
 app.post('/api/adoptions', (req, res) => {
   const listingData = req.body;
   const newListing = { id: Date.now().toString(), status: 'available', requests: [], ...listingData };
@@ -301,7 +301,7 @@ app.post('/api/adoptions/request', (req, res) => {
   }
 });
 
-// API: INJURED REPORTS
+// injured logs
 app.post('/api/injured', (req, res) => {
   const reportData = req.body;
   const newReport = { id: Date.now().toString(), timestamp: new Date().toISOString(), ...reportData };
@@ -309,7 +309,7 @@ app.post('/api/injured', (req, res) => {
   res.json({ success: true, injuredReports: state.injuredReports });
 });
 
-// API: NOTIFICATIONS
+// push notifs
 app.post('/api/notifications', (req, res) => {
   const notifData = req.body;
   const newNotif = { id: Date.now().toString(), timestamp: new Date().toISOString(), read: false, ...notifData };
@@ -317,7 +317,7 @@ app.post('/api/notifications', (req, res) => {
   res.json({ success: true, notifications: state.notifications });
 });
 
-// API: TAG REQUESTS
+// req tags
 app.post('/api/tag-requests', (req, res) => {
   const reqData = req.body;
   const newReq = { id: req.body.id || Date.now().toString(), status: 'pending', timestamp: new Date().toISOString(), ...reqData };
