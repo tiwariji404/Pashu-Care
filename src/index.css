@@ -231,11 +231,12 @@ p { color: var(--text-secondary); margin-bottom: 1rem; }
 /* When viewed on tablets/laptops, break out of the 480px mobile app constraint */
 @media (min-width: 768px) {
   .container {
-    max-width: 1200px;
-    margin: 2rem auto;
-    border-radius: 12px;
-    min-height: calc(100vh - 4rem);
-    border: 1px solid var(--border-color);
+    max-width: 100%;
+    margin: 0;
+    border-radius: 0;
+    min-height: 100vh;
+    border: none;
+    box-shadow: none;
   }
 
   /* Center the login wrapper gorgeously on desktop */
@@ -269,5 +270,158 @@ p { color: var(--text-secondary); margin-bottom: 1rem; }
   .header {
     border-top-left-radius: 12px;
     border-top-right-radius: 12px;
+  }
+}
+
+/* Custom Split Screen Login Layout */
+.login-split-container {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+}
+
+.login-left-pane {
+  flex: 1;
+  background-color: #f9f4eb;
+  padding: 1.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  position: relative;
+}
+
+.login-watermark {
+  position: absolute;
+  opacity: 0.05;
+  pointer-events: none;
+}
+
+.login-watermark-top { top: -20px; left: -20px; width: 250px; }
+.login-watermark-bottom { bottom: 0; left: 0; width: 250px; }
+
+.login-left-features {
+  display: flex;
+  gap: 2rem;
+  margin-top: 1.5rem;
+}
+
+.login-feature-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 250px;
+}
+
+.login-feature-item img {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 0.5rem;
+}
+
+.login-right-pane {
+  flex: 1;
+  background-color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem 2rem;
+  position: relative;
+  /* subtle circuit pattern via CSS gradient */
+  background-image: 
+    linear-gradient(rgba(16, 185, 129, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(16, 185, 129, 0.03) 1px, transparent 1px);
+  background-size: 50px 50px;
+}
+
+.login-card {
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+  border: 1px solid rgba(0,0,0,0.05);
+  position: relative;
+  z-index: 2;
+}
+
+.login-card h2 {
+  text-align: center;
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.captcha-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid var(--border-color);
+  padding: 0.65rem 1rem;
+  border-radius: var(--border-radius);
+  background: #fdfdfd;
+  color: var(--text-secondary);
+}
+
+.demo-otp-box {
+  background: #f1f5f9;
+  border-radius: 8px;
+  padding: 0.75rem;
+  text-align: center;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  border: 1px dashed var(--border-color);
+}
+
+.login-footer {
+  margin-top: 1.5rem;
+  text-align: center;
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.input-with-flag {
+  display: flex;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  background: white;
+}
+
+.input-with-flag .flag-box {
+  display: flex;
+  align-items: center;
+  padding: 0 0.75rem;
+  background: #f8fafc;
+  border-right: 1px solid var(--border-color);
+  font-size: 1.1rem;
+}
+
+.input-with-flag input {
+  border: none;
+  padding: 0.75rem;
+  flex: 1;
+  outline: none;
+}
+
+.input-with-flag input:focus {
+  box-shadow: none;
+}
+
+@media (max-width: 768px) {
+  .login-split-container {
+    flex-direction: column;
+  }
+  .login-left-features {
+    flex-direction: column;
   }
 }

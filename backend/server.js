@@ -76,7 +76,19 @@ let state = {
   injuredReports: [],
   fieldCamps: [
     { id: 'fc1', location: 'Ward 5, Garhwa', date: '2026-09-17', status: 'upcoming', type: 'Tagging Camp' }
-  ]
+  ],
+  auditLogs: []
+};
+
+// helper to push audit log
+const logAudit = (action, details, userPhone) => {
+  state.auditLogs.unshift({
+    id: Date.now().toString(),
+    timestamp: new Date().toISOString(),
+    action,
+    details,
+    userPhone
+  });
 };
 
 // get frontend state
@@ -96,19 +108,21 @@ app.get('/api/state', (req, res) => {
     notifications: state.notifications,
     tagRequests: state.tagRequests,
     injuredReports: state.injuredReports,
-    fieldCamps: state.fieldCamps
+    fieldCamps: state.fieldCamps,
+    auditLogs: state.auditLogs
   });
 });
 
 // handle inventory transfers
 app.post('/api/inventory/transfer', (req, res) => {
-  const { phone, amount } = req.body;
+  const { phone, amount, userPhone } = req.body;
   const user = state.users.find(u => u.phone === phone);
   
   if (user && user.inventory) {
     user.inventory.total += amount;
     user.inventory.remaining += amount;
     state.warehouseInventory -= amount;
+    logAudit('INVENTORY_ALLOCATED', `Allocated ${amount} tags to ${user.name} (${phone})`, userPhone || 'Admin');
     res.json({ success: true, inventory: user.inventory, warehouseInventory: state.warehouseInventory });
   } else {
     res.status(404).json({ error: 'User not found or no inventory' });
@@ -149,7 +163,7 @@ app.get('/api/auth/check/:phone', (req, res) => {
 
 // user roles
 app.post('/api/users/assign-role', (req, res) => {
-  const { phone, name, role } = req.body;
+  const { phone, name, role, adminPhone } = req.body;
   
   let label = 'कार्य';
   if(role === 'gaushala_manager') label = 'गौशाला क्षमता';
@@ -160,8 +174,10 @@ app.post('/api/users/assign-role', (req, res) => {
   const activeHours = Math.floor(Math.random() * 9) + 4; // assign random shift hours
   if (existingUserIndex >= 0) {
     state.users[existingUserIndex] = { ...state.users[existingUserIndex], role, name, activeHours: state.users[existingUserIndex].activeHours || activeHours, inventory: { total: 100, remaining: 100, label } };
+    logAudit('ROLE_UPDATED', `Updated ${name} (${phone}) to ${role}`, adminPhone || 'Admin');
   } else {
     state.users.push({ phone, role, name, location: 'Assigned by Admin', activeHours, inventory: { total: 100, remaining: 100, label } });
+    logAudit('ROLE_ASSIGNED', `Assigned ${role} role to new user ${name} (${phone})`, adminPhone || 'Admin');
   }
   res.json({ success: true, users: state.users });
 });
@@ -265,6 +281,44 @@ app.put('/api/complaints/:id/dispute', (req, res) => {
   }
   res.status(400).json({ error: 'Unable to dispute' });
 });
+
+app.put('/api/complaints/:id/escalate', (req, res) => {
+  const { department, adminPhone } = req.body;
+  const complaintId = req.params.id;
+  
+  const index = state.complaints.findIndex(c => c.id === complaintId);
+  if (index !== -1) {
+    state.complaints[index].status = `escalated_${department.toLowerCase()}`;
+    state.complaints[index].escalatedTo = department;
+    logAudit('ISSUE_ESCALATED', `Complaint/Report ${complaintId} escalated to ${department}`, adminPhone || 'Admin');
+    return res.json({ success: true, complaints: state.complaints });
+  }
+  
+  // also check missing and injured lists conceptually
+  let found = false;
+  let idx = state.injuredReports.findIndex(r => r.id === complaintId);
+  if(idx !== -1) {
+    state.injuredReports[idx].status = `escalated_${department.toLowerCase()}`;
+    state.injuredReports[idx].escalatedTo = department;
+    found = true;
+  }
+  idx = state.missingReports.findIndex(r => r.id === complaintId);
+  if(idx !== -1) {
+    state.missingReports[idx].status = `escalated_${department.toLowerCase()}`;
+    state.missingReports[idx].escalatedTo = department;
+    found = true;
+  }
+
+  if (found) {
+    logAudit('ISSUE_ESCALATED', `Report ${complaintId} escalated to ${department}`, adminPhone || 'Admin');
+    return res.json({ success: true, complaints: state.complaints, injuredReports: state.injuredReports, missingReports: state.missingReports });
+  }
+
+  res.status(400).json({ error: 'Unable to escalate' });
+});
+
+// fetch logs
+app.get('/api/audit-logs', (req, res) => res.json(state.auditLogs));
 
 // missing reports
 app.post('/api/missing', (req, res) => {

@@ -56,6 +56,15 @@ export default function PatrolDashboard() {
 
         <h3 style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Map size={20} /> Field Actions</h3>
 
+        <div className="card" style={{ marginBottom: '1.5rem', padding: 0, overflow: 'hidden' }}>
+          <iframe 
+            style={{ border: 0, width: '100%', height: '250px', display: 'block' }}
+            loading="lazy"
+            allowFullScreen
+            src={`https://maps.google.com/maps?q=${encodeURIComponent(user?.location || 'India')}&t=&z=13&ie=UTF8&iwloc=&output=embed`}
+          ></iframe>
+        </div>
+
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <button className="btn btn-outline" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem' }} onClick={() => navigate('/missing')}>
             <span style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}><Search size={20} /> Active Missing Reports</span>
@@ -83,7 +92,25 @@ export default function PatrolDashboard() {
                   <span className="badge" style={{ backgroundColor: 'rgba(16, 185, 129, 0.1)', color: 'var(--primary-hover)' }}>{c.status.toUpperCase()}</span>
                 </div>
                 <p style={{ margin: '0.5rem 0', fontSize: '0.875rem' }}>Note: {c.reason}</p>
-                <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{new Date(c.timestamp).toLocaleString()}</span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{new Date(c.timestamp).toLocaleString()}</span>
+                  <button className="btn btn-outline" style={{ fontSize: '0.75rem', padding: '0.25rem 0.5rem' }} onClick={() => {
+                    const iframes = document.querySelectorAll('.map-iframe-report');
+                    iframes.forEach(iframe => iframe.style.display = 'none');
+                    const mapEl = document.getElementById('map-report-' + c.id);
+                    if (mapEl) mapEl.style.display = 'block';
+                  }}>📍 Map</button>
+                </div>
+                {c.location && (
+                  <iframe 
+                    id={'map-report-' + c.id}
+                    className="map-iframe-report"
+                    style={{ display: 'none', border: 0, width: '100%', height: '150px', marginTop: '0.5rem', borderRadius: '8px' }}
+                    loading="lazy"
+                    allowFullScreen
+                    src={`https://maps.google.com/maps?q=${encodeURIComponent(c.location?.lat ? (c.location.lat+','+c.location.lng) : 'India')}&t=&z=13&ie=UTF8&iwloc=&output=embed`}
+                  ></iframe>
+                )}
               </div>
             ))
           )}

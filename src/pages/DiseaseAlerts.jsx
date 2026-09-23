@@ -54,6 +54,23 @@ export default function DiseaseAlerts() {
                         <span>Reported By: {alert.reportedBy}</span>
                         <span>{alert.date}</span>
                       </div>
+                      <div style={{ marginTop: '0.5rem' }}>
+                        <button className="btn btn-outline" style={{ fontSize: '0.75rem', padding: '0.25rem 0.5rem' }} onClick={() => {
+                          const iframes = document.querySelectorAll('.map-iframe');
+                          iframes.forEach(iframe => iframe.style.display = 'none');
+                          document.getElementById('map-' + alert.id).style.display = 'block';
+                        }}>
+                          View on Map 📍
+                        </button>
+                      </div>
+                      <iframe 
+                        id={'map-' + alert.id}
+                        className="map-iframe"
+                        style={{ display: 'none', border: 0, width: '100%', height: '200px', marginTop: '0.5rem', borderRadius: '8px' }}
+                        loading="lazy"
+                        allowFullScreen
+                        src={`https://maps.google.com/maps?q=${encodeURIComponent(alert.location)}&t=&z=13&ie=UTF8&iwloc=&output=embed`}
+                      ></iframe>
                     </div>
                   </div>
                 </div>

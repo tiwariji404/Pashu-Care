@@ -63,6 +63,23 @@ export default function ManagerDashboard() {
                 <div style={{ fontSize: '0.75rem', color: '#b91c1c' }}>
                   Reported by: {r.reportedBy} ({r.reporterPhone}) | {new Date(r.timestamp).toLocaleString()}
                 </div>
+                <div style={{ marginTop: '0.5rem' }}>
+                  <button className="btn btn-outline" style={{ fontSize: '0.75rem', padding: '0.25rem 0.5rem', borderColor: '#fca5a5', color: '#991b1b' }} onClick={() => {
+                    const iframes = document.querySelectorAll('.map-iframe-rescue');
+                    iframes.forEach(iframe => iframe.style.display = 'none');
+                    document.getElementById('map-rescue-' + r.id).style.display = 'block';
+                  }}>
+                    View on Map 📍
+                  </button>
+                </div>
+                <iframe 
+                  id={'map-rescue-' + r.id}
+                  className="map-iframe-rescue"
+                  style={{ display: 'none', border: 0, width: '100%', height: '200px', marginTop: '0.5rem', borderRadius: '8px' }}
+                  loading="lazy"
+                  allowFullScreen
+                  src={`https://maps.google.com/maps?q=${encodeURIComponent(r.location)}&t=&z=13&ie=UTF8&iwloc=&output=embed`}
+                ></iframe>
               </div>
             ))}
           </div>

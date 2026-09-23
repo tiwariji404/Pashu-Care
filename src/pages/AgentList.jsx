@@ -6,7 +6,7 @@ import { ArrowLeft, Users, Clock } from 'lucide-react';
 export default function AgentList() {
   const { role } = useParams();
   const navigate = useNavigate();
-  const users = useAppStore(state => state.users);
+  const { users, cows } = useAppStore();
 
   const roleDetails = {
     tagging_agent: { title: 'Tagging Agents', color: '#3b82f6', bg: 'rgba(59, 130, 246, 0.05)' },
@@ -39,6 +39,8 @@ export default function AgentList() {
             const inv = worker.inventory || { total: 0, remaining: 0, label: 'Task' };
             const used = inv.total - inv.remaining;
             const progressPercent = inv.total > 0 ? (used / inv.total) * 100 : 0;
+            const actualRegistered = cows.filter(c => c.phone === worker.phone).length;
+            const actualUsageDiff = used - actualRegistered;
             return (
               <div 
                 key={worker.phone} 
@@ -56,6 +58,14 @@ export default function AgentList() {
                 <div style={{ width: '100%', height: '8px', backgroundColor: 'rgba(0,0,0,0.1)', borderRadius: '4px', overflow: 'hidden' }}>
                   <div style={{ width: `${progressPercent}%`, height: '100%', backgroundColor: details.color }}></div>
                 </div>
+                
+                {role === 'tagging_agent' && (
+                  <div style={{ marginTop: '1rem', padding: '0.5rem', backgroundColor: actualUsageDiff > 10 ? '#fef2f2' : '#f0fdf4', border: `1px dashed ${actualUsageDiff > 10 ? '#ef4444' : '#22c55e'}`, borderRadius: '4px', fontSize: '0.85rem' }}>
+                     <strong style={{ color: actualUsageDiff > 10 ? '#b91c1c' : '#15803d' }}>Productivity & Fraud Check:</strong><br/>
+                     Tags Missing/Unregistered: {actualUsageDiff}
+                     {actualUsageDiff > 10 && <p style={{margin: '0.5rem 0 0 0', color: '#b91c1c'}}>🚨 High discrepancy detected! Potential fraud or lost tags.</p>}
+                  </div>
+                )}
               </div>
             );
           })}

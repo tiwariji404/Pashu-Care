@@ -83,12 +83,22 @@ export default function TaggingDashboard() {
         <div style={{ marginBottom: '1.5rem', display: 'grid', gap: '0.5rem' }}>
           {myCamps.length === 0 && <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>No upcoming camps scheduled.</p>}
           {myCamps.map((camp, i) => (
-             <div key={i} className="card" style={{ padding: '0.75rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div>
-                   <strong style={{ display: 'block', fontSize: '0.9rem' }}>{camp.location}</strong>
-                   <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.2rem' }}><Clock size={12}/> {new Date(camp.date).toLocaleDateString()}</span>
-                </div>
-                <span className="badge" style={{ backgroundColor: '#ebf8ff', color: '#3182ce' }}>{camp.status}</span>
+             <div key={i} className="card" style={{ padding: '0.75rem' }}>
+               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                     <strong style={{ display: 'block', fontSize: '0.9rem' }}>{camp.location}</strong>
+                     <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.2rem' }}><Clock size={12}/> {new Date(camp.date).toLocaleDateString()}</span>
+                  </div>
+                  <span className="badge" style={{ backgroundColor: '#ebf8ff', color: '#3182ce' }}>{camp.status}</span>
+               </div>
+               <div style={{ marginTop: '0.75rem', padding: 0, overflow: 'hidden', borderRadius: '8px' }}>
+                 <iframe 
+                   style={{ border: 0, width: '100%', height: '150px', display: 'block' }}
+                   loading="lazy"
+                   allowFullScreen
+                   src={`https://maps.google.com/maps?q=${encodeURIComponent(camp.location)}&t=&z=13&ie=UTF8&iwloc=&output=embed`}
+                 ></iframe>
+               </div>
              </div>
           ))}
         </div>

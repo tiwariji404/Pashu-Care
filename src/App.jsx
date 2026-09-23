@@ -1,6 +1,7 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useAppStore } from './store/appStore';
+import { Toaster } from 'react-hot-toast';
 
 // Pages
 import Login from './pages/Login';
@@ -19,6 +20,9 @@ import WorkerProfile from './pages/WorkerProfile';
 import AgentList from './pages/AgentList';
 import AdoptionPortal from './pages/AdoptionPortal';
 import MyAnimals from './pages/MyAnimals';
+import HeatmapDashboard from './pages/HeatmapDashboard';
+import EscalationPortal from './pages/EscalationPortal';
+import AuditLogs from './pages/AuditLogs';
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -29,10 +33,23 @@ const ProtectedRoute = ({ children }) => {
   return children;
 };
 
+// Route wrapper that dynamically adds container ONLY when not in login
+const LayoutWrapper = ({ children }) => {
+  const location = useLocation();
+  const isLogin = location.pathname === '/login';
+  
+  if (isLogin) {
+    return <>{children}</>;
+  }
+  
+  return <div className="container">{children}</div>;
+};
+
 function App() {
   return (
     <Router>
-      <div className="container">
+      <Toaster position="top-right" />
+      <LayoutWrapper>
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
@@ -50,8 +67,11 @@ function App() {
           <Route path="/adoption" element={<ProtectedRoute><AdoptionPortal /></ProtectedRoute>} />
           <Route path="/my-animals" element={<ProtectedRoute><MyAnimals /></ProtectedRoute>} />
           <Route path="/admin/agents/:role" element={<ProtectedRoute><AgentList /></ProtectedRoute>} />
+          <Route path="/admin/heatmap" element={<ProtectedRoute><HeatmapDashboard /></ProtectedRoute>} />
+          <Route path="/admin/escalations" element={<ProtectedRoute><EscalationPortal /></ProtectedRoute>} />
+          <Route path="/admin/audit" element={<ProtectedRoute><AuditLogs /></ProtectedRoute>} />
         </Routes>
-      </div>
+      </LayoutWrapper>
     </Router>
   );
 }

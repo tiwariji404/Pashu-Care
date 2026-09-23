@@ -2,7 +2,8 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAppStore } from '../store/appStore';
-import { ScanLine, ShieldCheck, AlertCircle, TrendingUp, Ban, MapPin, AlertTriangle, Stethoscope, BookOpen, Activity, Ambulance, UserCircle, UserPlus, Users, Package, HeartHandshake, FileText } from 'lucide-react';
+import { ScanLine, ShieldCheck, AlertCircle, TrendingUp, Ban, MapPin, AlertTriangle, Stethoscope, BookOpen, Activity, Ambulance, UserCircle, UserPlus, Users, Package, HeartHandshake, FileText, Map, ShieldAlert, FileSignature } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import ManagerDashboard from './ManagerDashboard';
 import PatrolDashboard from './PatrolDashboard';
 import TaggingDashboard from './TaggingDashboard';
@@ -184,70 +185,53 @@ export default function Dashboard() {
         )}
 
         {user?.role === 'admin' && (
-          <div className="card" style={{ marginBottom: '2rem', borderColor: '#cbd5e1', backgroundColor: '#f8fafc' }}>
-            <h3 style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', marginBottom: '1rem' }}>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#475569' }}>
-                <Package size={20} /> {t('rfid_supply')}
-              </span>
-              <span className="badge" style={{ backgroundColor: '#64748b', color: 'white', fontSize: '0.8rem' }}>
-                {t('govt_stock')} {warehouseInventory?.toLocaleString() || 50000}
-              </span>
-            </h3>
-            <form onSubmit={handleAllocate}>
-              <div className="form-group" style={{ marginBottom: '0.75rem' }}>
-                <label style={{ fontSize: '0.85rem', color: '#334155' }}>{t('select_tagging_agent')}</label>
-                <select
-                  className="form-control"
-                  value={rfidAgent}
-                  onChange={e => setRfidAgent(e.target.value)}
-                  style={{ backgroundColor: 'white', borderColor: '#cbd5e1' }}
-                  required
-                >
-                  <option value="">{t('choose_active_agent')}</option>
-                  {users.filter(u => u.role === 'tagging_agent').map(a => (
-                    <option key={a.phone} value={a.phone}>{a.name} ({a.phone})</option>
-                  ))}
-                </select>
-              </div>
-              <div className="form-group" style={{ marginBottom: '1rem' }}>
-                <label style={{ fontSize: '0.85rem', color: '#334155' }}>{t('tag_quantity')}</label>
-                <input
-                  type="number"
-                  className="form-control"
-                  placeholder="e.g. 50"
-                  value={rfidAmount}
-                  onChange={e => setRfidAmount(e.target.value)}
-                  style={{ backgroundColor: 'white', borderColor: '#cbd5e1' }}
-                  required
-                  min="1"
-                />
-              </div>
-              <button type="submit" className="btn" style={{ width: '100%', padding: '0.75rem', backgroundColor: '#475569', color: 'white', border: 'none' }}>{t('dispatch_tags')}</button>
-            </form>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
+            <button 
+              onClick={() => navigate('/admin/heatmap')}
+              style={{ padding: '1rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', backgroundColor: '#fdf4ff', border: '1px solid #d946ef', borderRadius: '8px', color: '#a21caf', cursor: 'pointer' }}
+            >
+              <Map size={32} />
+              <strong style={{ fontSize: '0.9rem' }}>Heatmap Alerts</strong>
+            </button>
+
+            <button 
+              onClick={() => navigate('/admin/escalations')}
+              style={{ padding: '1rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', backgroundColor: '#fef2f2', border: '1px solid #ef4444', borderRadius: '8px', color: '#b91c1c', cursor: 'pointer' }}
+            >
+              <ShieldAlert size={32} />
+              <strong style={{ fontSize: '0.9rem' }}>Gov Escalations</strong>
+            </button>
+
+            <button 
+              onClick={() => navigate('/admin/audit')}
+              style={{ padding: '1rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', backgroundColor: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: '8px', color: '#475569', cursor: 'pointer' }}
+            >
+              <FileSignature size={32} />
+              <strong style={{ fontSize: '0.9rem' }}>Audit Logs</strong>
+            </button>
           </div>
         )}
 
-        {user?.role === 'admin' && tagRequests && tagRequests.filter(r => r.status === 'pending').length > 0 && (
-          <div className="card" style={{ marginBottom: '2rem', borderColor: '#3b82f6', backgroundColor: '#eff6ff' }}>
-            <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem', color: '#1e3a8a' }}>
-              <Package size={20} /> Pending Tag Requisitions
-            </h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              {tagRequests.filter(r => r.status === 'pending').map((req, i) => {
-                const reqUser = users.find(u => u.phone === req.phone);
-                return (
-                  <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'white', padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid #bfdbfe' }}>
-                    <div>
-                      <strong>{reqUser?.name || 'Unknown Agent'}</strong> ({req.phone})
-                      <div style={{ fontSize: '0.8rem', color: '#475569' }}>Requested: {req.amount} Tags</div>
-                    </div>
-                    <button className="btn btn-primary" style={{ padding: '0.4rem 0.75rem' }} onClick={() => approveTagRequest(req.id)}>Approve</button>
-                  </div>
-                );
-              })}
+        {user?.role === 'admin' && (
+          <div className="card" style={{ marginBottom: '2rem', borderColor: '#cbd5e1' }}>
+            <h3 style={{ marginBottom: '1rem' }}>Staff Distribution</h3>
+            <div style={{ width: '100%', height: '250px' }}>
+              <ResponsiveContainer>
+                <BarChart data={[
+                  { name: 'Tagging', count: users.filter(u => u.role === 'tagging_agent').length },
+                  { name: 'Patrol', count: users.filter(u => u.role === 'patrol_squad').length },
+                  { name: 'Manager', count: users.filter(u => u.role === 'gaushala_manager').length }
+                ]}>
+                  <XAxis dataKey="name" />
+                  <YAxis allowDecimals={false} />
+                  <Tooltip />
+                  <Bar dataKey="count" fill="var(--primary-color)" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
             </div>
           </div>
         )}
+
 
         {user?.role === 'admin' && (
           <div className="card" style={{ marginBottom: '2rem', borderColor: 'var(--primary-color)' }}>
@@ -294,19 +278,15 @@ export default function Dashboard() {
           </div>
         )}
 
-        <button
-          className="btn btn-primary"
-          onClick={() => navigate('/scan')}
-          style={{ padding: '2rem', height: 'auto', fontSize: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1rem', backgroundColor: '#0f172a' }}
-        >
-          <ScanLine size={48} />
-          {t('scan_rfid')}
-        </button>
-
-        {user?.role === 'admin' && (
-          <p style={{ marginTop: '1rem', fontSize: '0.85rem', textAlign: 'center' }}>
-            {t('scan_desc')}
-          </p>
+        {user?.role !== 'admin' && (
+          <button
+            className="btn btn-primary"
+            onClick={() => navigate('/scan')}
+            style={{ padding: '2rem', height: 'auto', fontSize: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1rem', backgroundColor: '#0f172a' }}
+          >
+            <ScanLine size={48} />
+            {t('scan_rfid')}
+          </button>
         )}
 
 
