@@ -16,7 +16,7 @@ export default function UserProfile() {
     navigate('/login');
   };
 
-  const userReports = missingReports.filter(r => r.reporterPhone === user.phone).length;
+  const userReports = (missingReports || []).filter(r => r.reporterPhone === user.phone).length;
 
   return (
     <>

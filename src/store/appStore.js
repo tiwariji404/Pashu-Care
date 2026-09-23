@@ -132,6 +132,12 @@ export const useAppStore = create(
           if (existingUser) {
             set({ user: existingUser });
             return true;
+          } else {
+            // Auto-register citizen
+            const newUser = { phone, role: 'user', name: 'Citizen', location: 'Local', inventory: {} };
+            set(state => ({ users: [...state.users, newUser], user: newUser }));
+            supabase.from('users').insert({ phone, name: 'Citizen', location: 'Local', role: 'user' }).then();
+            return true;
           }
         }
         return false;

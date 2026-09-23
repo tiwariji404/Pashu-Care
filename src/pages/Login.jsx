@@ -15,11 +15,7 @@ export default function Login() {
   const handleSendOtp = (e) => {
     e.preventDefault();
     if (phone.length === 10) {
-      if (checkUser(phone) || phone === '9999999999') {
-        setStep('otp');
-      } else {
-        alert('Demo version: Please use listed numbers only');
-      }
+      setStep('otp');
     }
   };
 
