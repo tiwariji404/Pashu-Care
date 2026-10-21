@@ -4,6 +4,13 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "start": "npm --prefix temp-expo-app start",
+    "mobile": "npm --prefix temp-expo-app start",
+    "android": "npm --prefix temp-expo-app run android",
+    "ios": "npm --prefix temp-expo-app run ios",
+    "web": "npm --prefix temp-expo-app run web",
+    "backend": "node backend/server.js",
+    "backend:dev": "node --watch backend/server.js",
     "dev": "vite",
     "build": "vite build",
     "lint": "oxlint",

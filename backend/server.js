@@ -402,7 +402,20 @@ app.put('/api/tag-requests/:id/approve', (req, res) => {
   res.status(400).json({ error: 'Unable to approve' });
 });
 
-const PORT = 3001;
-app.listen(PORT, () => {
-  console.log(`Backend API serving on http://localhost:${PORT}`);
+// Health check for mobile app and diagnostics
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'online',
+    app: 'Pashu Care Mobile Backend API',
+    version: '2.0.0',
+    timestamp: new Date().toISOString()
+  });
+});
+
+const PORT = process.env.PORT || 3001;
+const HOST = '0.0.0.0';
+app.listen(PORT, HOST, () => {
+  console.log(`[Pashu Care Backend] Serving on http://${HOST}:${PORT}`);
+  console.log(`[Pashu Care Backend] Local URL: http://localhost:${PORT}`);
+  console.log(`[Pashu Care Backend] Health check: http://localhost:${PORT}/api/health`);
 });
