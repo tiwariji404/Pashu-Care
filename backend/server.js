@@ -1,9 +1,26 @@
+try { require('dotenv').config(); } catch (e) {}
 const express = require('express');
 const cors = require('cors');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+// Firebase Realtime / REST Cloud Sync helper (syncs when FIREBASE_DATABASE_URL is set)
+const syncToFirebase = async (collection, data) => {
+  const dbUrl = process.env.FIREBASE_DATABASE_URL;
+  if (!dbUrl) return;
+  try {
+    const url = `${dbUrl.replace(/\/$/, '')}/${collection}.json`;
+    await fetch(url, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+  } catch (err) {
+    console.warn(`[Firebase Sync Warning] ${collection}:`, err.message);
+  }
+};
 
 // active state db
 let state = {
@@ -190,12 +207,47 @@ app.put('/api/users/inventory', (req, res) => {
   res.json({ success: true, users: state.users });
 });
 
-// cows
+// cows REST endpoints
+app.get('/api/cows', (req, res) => {
+  res.json(state.cows);
+});
+
+app.get('/api/cows/:qrId', (req, res) => {
+  const cow = state.cows.find(c => c.qrId === req.params.qrId);
+  if (!cow) return res.status(404).json({ error: 'Animal not found' });
+  res.json(cow);
+});
+
 app.post('/api/cows', (req, res) => {
   const cowData = req.body;
   state.cows.push({ ...cowData, strikes: 0, seized: false });
+  syncToFirebase('cows', state.cows);
   res.json({ success: true, cows: state.cows });
 });
+
+// complaints REST endpoints
+app.get('/api/complaints', (req, res) => {
+  res.json(state.complaints);
+});
+
+app.get('/api/complaints/:id', (req, res) => {
+  const complaint = state.complaints.find(c => c.id === req.params.id);
+  if (!complaint) return res.status(404).json({ error: 'Complaint not found' });
+  res.json(complaint);
+});
+
+// resource GET endpoints
+app.get('/api/users', (req, res) => res.json(state.users));
+app.get('/api/gaushalas', (req, res) => res.json(state.gaushalas));
+app.get('/api/vets', (req, res) => res.json(state.vets));
+app.get('/api/ambulances', (req, res) => res.json(state.ambulances));
+app.get('/api/alerts', (req, res) => res.json(state.diseaseAlerts));
+app.get('/api/missing', (req, res) => res.json(state.missingReports));
+app.get('/api/adoptions', (req, res) => res.json(state.adoptions));
+app.get('/api/injured', (req, res) => res.json(state.injuredReports));
+app.get('/api/tag-requests', (req, res) => res.json(state.tagRequests));
+app.get('/api/notifications', (req, res) => res.json(state.notifications));
+app.get('/api/revenue', (req, res) => res.json(state.revenue));
 
 // complaints route
 app.post('/api/complaints', (req, res) => {
@@ -248,9 +300,11 @@ app.post('/api/complaints', (req, res) => {
 
   if (issueFine) {
     state.cows[cowIndex] = { ...cow, strikes: newStrikes, seized };
+    syncToFirebase('cows', state.cows);
   }
   
   state.complaints.push(newComplaint);
+  syncToFirebase('complaints', state.complaints);
 
   res.json({ success: true, complaints: state.complaints, cows: state.cows });
 });
@@ -267,6 +321,8 @@ app.put('/api/complaints/:id/pay', (req, res) => {
       municipality: newTotal * 0.60,
       pppFirm: newTotal * 0.40
     };
+    syncToFirebase('complaints', state.complaints);
+    syncToFirebase('revenue', state.revenue);
     return res.json({ success: true, complaints: state.complaints, revenue: state.revenue });
   }
   res.status(400).json({ error: 'Unable to pay' });
@@ -325,6 +381,7 @@ app.post('/api/missing', (req, res) => {
   const reportData = req.body;
   const newReport = { id: Date.now().toString(), timestamp: new Date().toISOString(), ...reportData };
   state.missingReports.unshift(newReport);
+  syncToFirebase('missingReports', state.missingReports);
   res.json({ success: true, missingReports: state.missingReports });
 });
 
@@ -333,6 +390,7 @@ app.post('/api/alerts', (req, res) => {
   const alertData = req.body;
   const newAlert = { id: Date.now().toString(), date: new Date().toISOString().split('T')[0], ...alertData };
   state.diseaseAlerts.unshift(newAlert);
+  syncToFirebase('diseaseAlerts', state.diseaseAlerts);
   res.json({ success: true, diseaseAlerts: state.diseaseAlerts });
 });
 
@@ -341,6 +399,7 @@ app.post('/api/adoptions', (req, res) => {
   const listingData = req.body;
   const newListing = { id: Date.now().toString(), status: 'available', requests: [], ...listingData };
   state.adoptions.unshift(newListing);
+  syncToFirebase('adoptions', state.adoptions);
   res.json({ success: true, adoptions: state.adoptions });
 });
 
@@ -349,6 +408,7 @@ app.post('/api/adoptions/request', (req, res) => {
   const index = state.adoptions.findIndex(a => a.id === adoptionId);
   if (index !== -1) {
     state.adoptions[index].requests.push({ id: Date.now().toString(), status: 'pending', ...requestData });
+    syncToFirebase('adoptions', state.adoptions);
     res.json({ success: true, adoptions: state.adoptions });
   } else {
     res.status(404).json({ error: 'Listing not found' });
@@ -360,6 +420,7 @@ app.post('/api/injured', (req, res) => {
   const reportData = req.body;
   const newReport = { id: Date.now().toString(), timestamp: new Date().toISOString(), ...reportData };
   state.injuredReports.unshift(newReport);
+  syncToFirebase('injuredReports', state.injuredReports);
   res.json({ success: true, injuredReports: state.injuredReports });
 });
 

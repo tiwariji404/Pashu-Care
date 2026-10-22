@@ -12,12 +12,14 @@
     "backend": "node backend/server.js",
     "backend:dev": "node --watch backend/server.js",
     "dev": "vite",
+    "dev:all": "concurrently -n \"backend,frontend\" -c \"blue,green\" \"npm run backend\" \"npm run dev\"",
     "build": "vite build",
     "lint": "oxlint",
     "preview": "vite preview"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.0",
+    "firebase": "^13.1.0",
     "html5-qrcode": "^2.3.8",
     "i18next": "^26.4.0",
     "lucide-react": "^1.31.0",
@@ -33,6 +35,7 @@
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.4",
+    "concurrently": "^10.0.6",
     "oxlint": "^1.75.0",
     "vite": "^8.2.0"
   }
